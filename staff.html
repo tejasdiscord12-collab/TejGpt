@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TejGPT Staff Center - Multi-User Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .staff-layout { display: flex; height: 100vh; background: #f0f4f9; padding: 1rem; gap: 1rem; }
+        .staff-sidebar { width: 300px; background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); padding: 1.5rem; display: flex; flex-direction: column; }
+        .staff-main { flex: 1; background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        
+        .session-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 1rem; }
+        .session-item { padding: 1rem; border-radius: 12px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; display: flex; align-items: center; gap: 10px; }
+        .session-item:hover { background: #f8f9fa; }
+        .session-item.active { background: #e1eaf5; border-color: var(--accent); }
+        .session-status { width: 8px; height: 8px; background: #34a853; border-radius: 50%; }
+
+        .chat-view { flex: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; background: #f8f9fa; }
+        .msg { max-width: 80%; padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.9rem; }
+        .msg.user { background: white; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .msg.staff { background: var(--accent); color: white; align-self: flex-end; }
+        
+        .input-bar { padding: 1.5rem; background: white; border-top: 1px solid #eee; display: flex; gap: 10px; }
+        .input-bar input { flex: 1; padding: 12px 20px; border-radius: 30px; border: 1px solid #ddd; outline: none; font-family: inherit; }
+        .send-btn { width: 44px; height: 44px; background: var(--accent); color: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #888; }
+    </style>
+</head>
+<body class="light-theme">
+    <div class="staff-layout">
+        <aside class="staff-sidebar">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 2rem;">
+                <div style="width: 32px; height: 32px; background: var(--accent); border-radius: 8px;"></div>
+                <h2 style="font-size: 1.1rem; font-weight: 700;">Staff Center</h2>
+            </div>
+            <div style="font-size: 0.75rem; font-weight: 700; color: #888; text-transform: uppercase;">Active Sessions</div>
+            <div class="session-list" id="session-list">
+                <!-- Session items will appear here -->
+            </div>
+            <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid #eee; font-size: 0.8rem; color: #888;">
+                Logged in as <strong>Tejas (Lead)</strong>
+            </div>
+        </aside>
+
+        <main class="staff-main">
+            <div id="chat-header" style="padding: 1.5rem; border-bottom: 1px solid #eee; display: none; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button id="join-btn" style="padding: 8px 15px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 600;">Join Session</button>
+                    <div>
+                        <h3 id="active-user-title" style="font-size: 1rem; font-weight: 700; margin: 0;">User_1234</h3>
+                        <div id="session-status-text" style="font-size: 0.75rem; color: #888;">Waiting for you to join...</div>
+                    </div>
+                </div>
+                <button onclick="clearCurrentSession()" style="padding: 8px 15px; background: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 0.75rem;">End Session</button>
+            </div>
+
+            <div class="chat-view" id="chat-view">
+                <div class="empty-state" id="empty-state">
+                    <i data-lucide="message-square" size="48" style="margin-bottom: 1rem; opacity: 0.2;"></i>
+                    <p>Select a user from the sidebar to begin helping.</p>
+                </div>
+            </div>
+
+            <div class="input-bar" id="input-bar" style="display: none;">
+                <input type="text" id="reply-input" placeholder="Type your reply...">
+                <button class="send-btn" id="reply-send-btn"><i data-lucide="send" size="18"></i></button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let activeSessionId = null;
+
+        function refreshSessions() {
+            const list = document.getElementById('session-list');
+            const keys = Object.keys(localStorage).filter(k => k.startsWith('support_session_'));
+            
+            // Keep current items but update them? Simple way: rebuild
+            const currentSelected = activeSessionId;
+            list.innerHTML = '';
+            
+            if (keys.length === 0) {
+                list.innerHTML = `<div style="padding: 20px; font-size: 0.85rem; color: #aaa;">No active sessions</div>`;
+                return;
+            }
+
+            keys.forEach(key => {
+                const userId = key.replace('support_session_', '');
+                const item = document.createElement('div');
+                item.className = `session-item ${activeSessionId === userId ? 'active' : ''}`;
+                item.innerHTML = `
+                    <div class="session-status"></div>
+                    <div style="flex:1">
+                        <div style="font-weight: 600; font-size: 0.85rem;">${userId}</div>
+                        <div style="font-size: 0.7rem; color: #888;">Active now</div>
+                    </div>
+                `;
+                item.onclick = () => selectSession(userId);
+                list.appendChild(item);
+            });
+        }
+
+        function selectSession(userId) {
+            activeSessionId = userId;
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('chat-header').style.display = 'flex';
+            document.getElementById('input-bar').style.display = 'flex';
+            document.getElementById('active-user-title').textContent = userId;
+            
+            // Check if already joined
+            const sessionKey = `support_session_${activeSessionId}`;
+            const messages = JSON.parse(localStorage.getItem(sessionKey) || '[]');
+            const hasJoined = messages.some(m => m.text.includes("has joined the chat"));
+            const joinBtn = document.getElementById('join-btn');
+            const statusText = document.getElementById('session-status-text');
+
+            if (hasJoined) {
+                joinBtn.style.display = 'none';
+                statusText.textContent = "Live Interaction";
+                statusText.style.color = "#34a853";
+            } else {
+                joinBtn.style.display = 'block';
+                statusText.textContent = "Waiting for you to join...";
+                statusText.style.color = "#888";
+            }
+
+            loadActiveMessages();
+            refreshSessions();
+        }
+
+        function joinSession() {
+            if (!activeSessionId) return;
+            const sessionKey = `support_session_${activeSessionId}`;
+            const messages = JSON.parse(localStorage.getItem(sessionKey) || '[]');
+            messages.push({ role: 'bot', text: 'Tejas has joined the chat.', timestamp: Date.now(), isSystem: true });
+            localStorage.setItem(sessionKey, JSON.stringify(messages));
+            selectSession(activeSessionId); // Refresh UI
+        }
+
+        document.getElementById('join-btn').addEventListener('click', joinSession);
+
+        function loadActiveMessages() {
+            if (!activeSessionId) return;
+            const container = document.getElementById('chat-view');
+            const sessionKey = `support_session_${activeSessionId}`;
+            const messages = JSON.parse(localStorage.getItem(sessionKey) || '[]');
+            
+            // Re-render chat
+            container.innerHTML = '';
+            messages.forEach(m => {
+                const div = document.createElement('div');
+                div.className = `msg ${m.role}`;
+                div.textContent = m.text;
+                container.appendChild(div);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendReply() {
+            const input = document.getElementById('reply-input');
+            const text = input.value.trim();
+            if (!text || !activeSessionId) return;
+
+            const sessionKey = `support_session_${activeSessionId}`;
+            const messages = JSON.parse(localStorage.getItem(sessionKey) || '[]');
+            messages.push({ role: 'staff', text: text, timestamp: Date.now() });
+            localStorage.setItem(sessionKey, JSON.stringify(messages));
+            
+            input.value = '';
+            loadActiveMessages();
+        }
+
+        function clearCurrentSession() {
+            if (!activeSessionId) return;
+            if (confirm(`End session for ${activeSessionId}?`)) {
+                const sessionKey = `support_session_${activeSessionId}`;
+                const messages = JSON.parse(localStorage.getItem(sessionKey) || '[]');
+                messages.push({ role: 'bot', text: 'The support session has ended.', timestamp: Date.now(), isEnd: true });
+                localStorage.setItem(sessionKey, JSON.stringify(messages));
+                
+                setTimeout(() => {
+                    localStorage.removeItem(sessionKey);
+                    activeSessionId = null;
+                    location.reload();
+                }, 1500);
+            }
+        }
+
+        document.getElementById('reply-send-btn').addEventListener('click', sendReply);
+        document.getElementById('reply-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') sendReply();
+        });
+
+        // Polling for real-time updates
+        setInterval(() => {
+            refreshSessions();
+            if (activeSessionId) loadActiveMessages();
+        }, 1000);
+
+        refreshSessions();
+        lucide.createIcons();
+    </script>
+</body>
+</html>

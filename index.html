@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TejGPT - Pro Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="light-theme">
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-top">
+                <button class="nav-icon-btn" id="menu-toggle">
+                    <i data-lucide="menu"></i>
+                </button>
+                <button class="new-chat-btn" id="new-chat">
+                    <i data-lucide="plus"></i>
+                    <span class="nav-text">New chat</span>
+                </button>
+            </div>
+            
+            <div class="sidebar-history" id="history-list">
+                <div class="history-section-label nav-text">Recent</div>
+                <!-- Chat history items will be injected here -->
+            </div>
+
+            <div class="sidebar-bottom">
+                <div class="nav-item" id="live-support-trigger">
+                    <i data-lucide="message-circle"></i>
+                    <span class="nav-text">Live Support</span>
+                </div>
+                <div class="nav-item" id="settings-btn">
+                    <i data-lucide="settings"></i>
+                    <span class="nav-text">Settings</span>
+                </div>
+                
+                <!-- Settings Menu -->
+                <div class="settings-dropdown" id="settings-menu">
+                    <div class="settings-section">
+                        <div class="settings-label">Appearance</div>
+                        <div class="theme-switch">
+                            <button class="theme-opt active" data-theme-val="light">Light</button>
+                            <button class="theme-opt" data-theme-val="dark">Dark</button>
+                            <button class="theme-opt" data-theme-val="system">System</button>
+                        </div>
+                    </div>
+                    <div class="settings-divider"></div>
+                    <div class="settings-option" onclick="window.open('staff.html', '_blank')">
+                        <i data-lucide="shield-check" size="14"></i>
+                        <span>Staff Center Dashboard</span>
+                    </div>
+                    <div class="settings-option" id="clear-history-btn">
+                        <i data-lucide="trash-2" size="14"></i>
+                        <span>Clear chat history</span>
+                    </div>
+                </div>
+
+                <div class="location-info nav-text">
+                    <div class="location-dot"></div>
+                    <span>Mumbai, MH, India</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="model-picker" id="model-selector">
+                    <span>TejGPT Fast</span>
+                    <i data-lucide="chevron-down" size="16"></i>
+                    <div class="model-menu" id="model-dropdown">
+                        <div class="model-menu-item active" data-model="fast">
+                            <strong>Fast</strong>
+                            <span>Great for everyday tasks</span>
+                        </div>
+                        <div class="model-menu-item" data-model="advanced">
+                            <strong>Advanced</strong>
+                            <span>Our most capable model</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="badge">Upgrade</div>
+                    <div class="icon-btn"><i data-lucide="layout-grid" size="20"></i></div>
+                    <div class="user-avatar">T</div>
+                </div>
+            </header>
+
+            <div class="chat-container">
+                <div class="messages-list" id="messages-container">
+                    <!-- Welcome Screen -->
+                    <div class="welcome-view" id="welcome-screen">
+                        <h1>Hello, Tejas</h1>
+                        <p class="subtitle">How can I help you today?</p>
+                        
+                        <div class="suggestion-grid">
+                            <div class="suggestion-card" onclick="setInput('generate image: a futuristic cyberpunk city with neon lights')">
+                                <i data-lucide="image"></i>
+                                <span>Create Image</span>
+                            </div>
+                            <div class="suggestion-card" onclick="setInput('Write a python script to parse a CSV file')">
+                                <i data-lucide="code"></i>
+                                <span>Write code</span>
+                            </div>
+                            <div class="suggestion-card" onclick="setInput('Plan a 5-day holiday in Japan')">
+                                <i data-lucide="map"></i>
+                                <span>Plan a trip</span>
+                            </div>
+                            <div class="suggestion-card" onclick="setInput('Draft an email for a job application')">
+                                <i data-lucide="mail"></i>
+                                <span>Draft email</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="input-area-container">
+                    <div class="input-bar-wrapper">
+                        <div class="input-bar">
+                            <button class="input-icon-btn" id="upload-btn">
+                                <i data-lucide="plus"></i>
+                            </button>
+                            <input type="file" id="file-input" style="display: none;">
+                            
+                            <textarea 
+                                id="chat-input" 
+                                placeholder="Enter a prompt here" 
+                                rows="1"
+                                autocomplete="off"
+                            ></textarea>
+                            
+                            <div class="input-right-actions">
+                                <button class="input-icon-btn" id="mic-btn"><i data-lucide="mic"></i></button>
+                                <button class="send-button" id="send-btn" disabled>
+                                    <i data-lucide="send"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-panel" id="preview-area" style="display: none;">
+                            <div class="preview-item">
+                                <img id="image-preview" src="" alt="">
+                                <button class="close-preview" id="remove-preview"><i data-lucide="x"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="disclaimer">TejGPT may display inaccurate info, so double-check its responses.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Voice Overlay -->
+    <div class="voice-screen" id="voice-overlay">
+        <div class="voice-anim">
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+        <h3>Listening...</h3>
+        <button class="voice-close" id="cancel-voice">Cancel</button>
+    </div>
+
+    <!-- Live Support Chat Widget -->
+    <div class="support-widget" id="support-widget">
+        <div class="support-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="support-avatar">HB</div>
+                <div>
+                    <div style="font-weight: 600; font-size: 0.85rem;">TejGPT Help Bot</div>
+                    <div style="font-size: 0.7rem; opacity: 0.8;">Active Now</div>
+                </div>
+            </div>
+            <button class="support-close" id="support-close"><i data-lucide="x" size="16"></i></button>
+        </div>
+        <div class="support-messages" id="support-messages">
+            <div class="support-msg bot bot-welcome">Hi Tejas! How can I help you today? I'm the official TejGPT Support Bot.</div>
+        </div>
+        <div class="support-input-area">
+            <input type="text" id="support-input" placeholder="Type a message...">
+            <button id="support-send"><i data-lucide="send" size="16"></i></button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
