@@ -144,9 +144,16 @@ function init() {
     const googleLoginWelcomeBtn = document.getElementById('google-login-welcome');
     const authModal = document.getElementById('auth-modal');
     const authClose = document.getElementById('auth-close');
+    const authSubmit = document.getElementById('auth-submit');
+    const authToggle = document.getElementById('auth-toggle');
+    const authTitle = document.getElementById('auth-title');
+    const authSubtitle = document.getElementById('auth-subtitle');
+    const authUserText = document.getElementById('auth-username');
+    const authPassText = document.getElementById('auth-password');
     const loginHeaderBtn = document.getElementById('login-btn-header');
     const authHeaderContainer = document.getElementById('auth-header-container');
     const welcomeAuthContainer = document.getElementById('welcome-auth-container');
+    let isSignupMode = false;
 
     function updateAuthState() {
         const currentUser = localStorage.getItem('tejgpt_user');
@@ -167,31 +174,62 @@ function init() {
 
     const handleGoogleAuth = async (btn) => {
         btn.disabled = true;
-        const originalText = btn.innerHTML;
+        const orgContent = btn.innerHTML;
         btn.innerHTML = `<i data-lucide="loader" class="spin"></i> Redirecting...`;
         if (window.lucide) lucide.createIcons();
         
         const { error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
-            options: {
-                redirectTo: window.location.origin
-            }
+            options: { redirectTo: window.location.origin }
         });
         
         if (error) {
             alert("Error: " + error.message);
             btn.disabled = false;
-            btn.innerHTML = originalText;
+            btn.innerHTML = orgContent;
         }
     };
 
-    if (googleLoginBtn) {
-        googleLoginBtn.addEventListener('click', () => handleGoogleAuth(googleLoginBtn));
-    }
+    if (googleLoginBtn) googleLoginBtn.addEventListener('click', () => handleGoogleAuth(googleLoginBtn));
+    if (googleLoginWelcomeBtn) googleLoginWelcomeBtn.addEventListener('click', () => handleGoogleAuth(googleLoginWelcomeBtn));
 
-    if (googleLoginWelcomeBtn) {
-        googleLoginWelcomeBtn.addEventListener('click', () => handleGoogleAuth(googleLoginWelcomeBtn));
-    }
+    authToggle.addEventListener('click', () => {
+        isSignupMode = !isSignupMode;
+        authTitle.textContent = isSignupMode ? "Create account" : "Welcome back";
+        authSubtitle.textContent = isSignupMode ? "Join the future of intelligence." : "Login to save your personal preferences.";
+        authSubmit.textContent = isSignupMode ? "Sign Up" : "Sign In";
+        authToggle.innerHTML = isSignupMode ? "Already have an account? <span>Sign in</span>" : "Don't have an account? <span>Sign up</span>";
+    });
+
+    authSubmit.addEventListener('click', async () => {
+        const username = authUserText.value.trim();
+        const password = authPassText.value.trim();
+        if (username && password) {
+            authSubmit.disabled = true;
+            authSubmit.textContent = isSignupMode ? "Signing Up..." : "Logging In...";
+            
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: isSignupMode ? 'signup' : 'login', username, password })
+                });
+
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+
+                localStorage.setItem('tejgpt_user', username);
+                authModal.classList.remove('active');
+                updateAuthState();
+                alert(isSignupMode ? `Welcome abroad, ${username}!` : `Welcome back, ${username}!`);
+            } catch (err) {
+                alert(`Auth Error: ${err.message}`);
+            } finally {
+                authSubmit.disabled = false;
+                authSubmit.textContent = isSignupMode ? "Sign Up" : "Sign In";
+            }
+        }
+    });
 
     if (loginHeaderBtn) {
         loginHeaderBtn.addEventListener('click', () => {

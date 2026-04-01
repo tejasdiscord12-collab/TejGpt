@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="light-theme">
@@ -15,7 +16,7 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-top">
-                <button class="nav-icon-btn" id="menu-toggle">
+                <button class="nav-icon-btn" id="sidebar-toggle-btn">
                     <i data-lucide="menu"></i>
                 </button>
                 <button class="new-chat-btn" id="new-chat">
@@ -26,7 +27,6 @@
             
             <div class="sidebar-history" id="history-list">
                 <div class="history-section-label nav-text">Recent</div>
-                <!-- Chat history items will be injected here -->
             </div>
 
             <div class="sidebar-bottom">
@@ -39,7 +39,6 @@
                     <span class="nav-text">Settings</span>
                 </div>
                 
-                <!-- Settings Menu -->
                 <div class="settings-dropdown" id="settings-menu">
                     <div class="settings-section">
                         <div class="settings-label">Appearance</div>
@@ -69,90 +68,69 @@
 
         <!-- Main Content -->
         <main class="main-content">
-    <header class="main-header">
-        <div class="header-left">
-            <button class="icon-btn" id="menu-toggle"><i data-lucide="menu" size="20"></i></button>
-            <div class="model-selector-container">
-                <div class="model-selector" id="model-selector">
-                    <span>TejGPT Fast</span>
-                    <i data-lucide="chevron-down" size="16"></i>
-                </div>
-                <div class="model-menu" id="model-dropdown">
-                    <div class="model-menu-item active" data-model="fast">
-                        <strong>Fast</strong>
-                        <span>Great for everyday tasks</span>
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="icon-btn" id="header-menu-toggle"><i data-lucide="menu" size="20"></i></button>
+                    <div class="model-selector-container">
+                        <div class="model-selector" id="model-selector">
+                            <span>TejGPT Fast</span>
+                            <i data-lucide="chevron-down" size="16"></i>
+                        </div>
+                        <div class="model-menu" id="model-dropdown">
+                            <div class="model-menu-item active" data-model="fast">
+                                <strong>Fast</strong>
+                                <span>Great for everyday tasks</span>
+                            </div>
+                            <div class="model-menu-item" data-model="advanced">
+                                <strong>Advanced</strong>
+                                <span>Our most capable model</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="model-menu-item" data-model="advanced">
-                        <strong>Advanced</strong>
-                        <span>Our most capable model</span>
-                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="header-right">
-            <div id="auth-header-container">
-                <button class="login-btn-pro" id="login-btn-header">Log In</button>
-            </div>
-            <button class="icon-btn" id="profile-btn" style="display: none;"><i data-lucide="user-circle" size="22"></i></button>
-        </div>
-    </header>
-
-    <!-- Auth Modal (Not Mandatory) -->
-    <div class="auth-modal-overlay" id="auth-modal">
-        <div class="auth-card">
-            <button class="auth-close" id="auth-close"><i data-lucide="x" size="20"></i></button>
-            <div class="auth-header">
-                <h2 id="auth-title">Welcome back</h2>
-                <p id="auth-subtitle">Login to save your personal preferences.</p>
-            </div>
-            <div class="auth-form" id="auth-form">
-                <input type="text" id="auth-username" placeholder="Username" autocomplete="off">
-                <input type="password" id="auth-password" placeholder="Password">
-                <button class="auth-action-btn" id="auth-submit">Sign In</button>
-            </div>
-            <div class="auth-footer" id="auth-footer">
-                Don't have an account? <span id="auth-toggle">Sign up</span>
-            </div>
-        </div>
-    </div>
+                <div class="header-right">
+                    <div id="auth-header-container">
+                        <button class="login-btn-pro" id="login-btn-header">Log In</button>
+                    </div>
+                    <button class="icon-btn" id="profile-btn" style="display: none;"><i data-lucide="user-circle" size="22"></i></button>
+                </div>
+            </header>
 
             <div class="chat-container">
-        <div class="messages-list" id="messages-container">
-            <!-- Welcome Screen -->
-            <div class="welcome-view" id="welcome-screen">
-                <div class="welcome-content">
-                    <h1>Hello, I am TejGPT</h1>
-                    <p class="subtitle">How can I help you today?</p>
-                    
-                    <div id="welcome-auth-container" style="margin: 2rem 0; display:flex; justify-content:center;">
-                        <button class="google-auth-btn-prime" id="google-login-welcome">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
-                            Continue with Google
-                        </button>
-                    </div>
+                <div class="messages-list" id="messages-container">
+                    <!-- Welcome Screen -->
+                    <div class="welcome-view" id="welcome-screen">
+                        <div class="welcome-content">
+                            <h1>Hello, I am TejGPT</h1>
+                            <p class="subtitle">How can I help you today?</p>
+                            
+                            <div id="welcome-auth-container" style="margin: 2.5rem 0; display:flex; justify-content:center;">
+                                <button class="google-auth-btn-prime" id="google-login-welcome">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+                                    Continue with Google
+                                </button>
+                            </div>
 
-                    <div class="suggestion-grid">
-                        <div class="suggestion-card" onclick="setInput('Create an image of an astronaut riding a horse in space')">
-                            <i data-lucide="image"></i>
-                            <p>Create Image</p>
-                        </div>
-                        <div class="suggestion-card" onclick="setInput('Help me write a Python script to scrape a website')">
-                            <i data-lucide="code"></i>
-                            <p>Write code</p>
-                        </div>
-                        <div class="suggestion-card" onclick="setInput('Plan a 3-day trip to Tokyo on a budget')">
-                            <i data-lucide="map"></i>
-                            <p>Plan a trip</p>
-                        </div>
-                        <div class="suggestion-card" onclick="setInput('Draft a professional email to my boss about a promotion')">
-                            <i data-lucide="mail"></i>
-                            <p>Draft email</p>
+                            <div class="suggestion-grid">
+                                <div class="suggestion-card" onclick="setInput('Create an image of an astronaut riding a horse in space')">
+                                    <i data-lucide="image"></i>
+                                    <p>Create Image</p>
+                                </div>
+                                <div class="suggestion-card" onclick="setInput('Help me write a Python script to scrape a website')">
+                                    <i data-lucide="code"></i>
+                                    <p>Write code</p>
+                                </div>
+                                <div class="suggestion-card" onclick="setInput('Plan a 3-day trip to Tokyo on a budget')">
+                                    <i data-lucide="map"></i>
+                                    <p>Plan a trip</p>
+                                </div>
+                                <div class="suggestion-card" onclick="setInput('Draft a professional email to my boss about a promotion')">
+                                    <i data-lucide="mail"></i>
+                                    <p>Draft email</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-                  </div>
                 </div>
 
                 <!-- Input Area -->
@@ -192,6 +170,34 @@
         </main>
     </div>
 
+    <!-- Auth Modal Overlay -->
+    <div class="auth-modal-overlay" id="auth-modal">
+        <div class="auth-card">
+            <button class="auth-close" id="auth-close"><i data-lucide="x" size="20"></i></button>
+            <div class="auth-header">
+                <h2>Access the Cloud</h2>
+                <p>Sign in to sync your chats across all devices.</p>
+            </div>
+            <div class="auth-form" id="auth-form">
+                <input type="text" id="auth-username" placeholder="Username" autocomplete="off">
+                <input type="password" id="auth-password" placeholder="Password">
+                <button class="auth-action-btn" id="auth-submit">Sign In</button>
+                
+                <div class="auth-divider">
+                    <span>OR</span>
+                </div>
+
+                <button class="google-auth-btn-prime" id="google-login">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+                    Continue with Google
+                </button>
+            </div>
+            <div class="auth-footer" id="auth-footer">
+                Don't have an account? <span id="auth-toggle">Sign up</span>
+            </div>
+       </div>
+    </div>
+
     <!-- Voice Overlay -->
     <div class="voice-screen" id="voice-overlay">
         <div class="voice-anim">
@@ -223,6 +229,6 @@
     </div>
 
     <script src="script.js"></script>
-    <script>lucide.createIcons();</script>
+    <script>if (window.lucide) lucide.createIcons();</script>
 </body>
 </html>
