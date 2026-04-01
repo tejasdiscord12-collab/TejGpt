@@ -135,6 +135,57 @@ function init() {
         }
     });
 
+    // Auth Logic
+    const profileBtn = document.getElementById('profile-btn');
+    const authModal = document.getElementById('auth-modal');
+    const authClose = document.getElementById('auth-close');
+    const authSubmit = document.getElementById('auth-submit');
+    const authToggle = document.getElementById('auth-toggle');
+    const authTitle = document.getElementById('auth-title');
+    const authSubtitle = document.getElementById('auth-subtitle');
+    const authUserText = document.getElementById('auth-username');
+    const authPassText = document.getElementById('auth-password');
+    let isSignupMode = false;
+
+    // Personal Greeting
+    const userName = localStorage.getItem('tejgpt_user');
+    if (userName) {
+        const welcomeTitle = document.querySelector('.welcome-screen h1');
+        if (welcomeTitle) welcomeTitle.textContent = `Hello, ${userName}`;
+    }
+
+    profileBtn.addEventListener('click', () => {
+        const currentUser = localStorage.getItem('tejgpt_user');
+        if (currentUser) {
+            if (confirm(`Logged in as ${currentUser}. Log out?`)) {
+                localStorage.removeItem('tejgpt_user');
+                location.reload();
+            }
+        } else {
+            authModal.classList.add('active');
+        }
+    });
+
+    authClose.addEventListener('click', () => authModal.classList.remove('active'));
+
+    authToggle.addEventListener('click', () => {
+        isSignupMode = !isSignupMode;
+        authTitle.textContent = isSignupMode ? "Create account" : "Welcome back";
+        authSubtitle.textContent = isSignupMode ? "Join the future of intelligence." : "Login to save your personal preferences.";
+        authSubmit.textContent = isSignupMode ? "Sign Up" : "Sign In";
+        authToggle.innerHTML = isSignupMode ? "Already have an account? <span>Sign in</span>" : "Don't have an account? <span>Sign up</span>";
+    });
+
+    authSubmit.addEventListener('click', () => {
+        const name = authUserText.value.trim();
+        const pass = authPassText.value.trim();
+        if (name && pass) {
+            localStorage.setItem('tejgpt_user', name);
+            authModal.classList.remove('active');
+            location.reload();
+        }
+    });
+
     // Support Trigger
     liveSupportTrigger.addEventListener('click', () => {
         supportWidget.classList.add('active');

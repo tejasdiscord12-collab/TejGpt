@@ -69,28 +69,49 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="top-header">
-                <div class="model-picker" id="model-selector">
+    <header class="main-header">
+        <div class="header-left">
+            <button class="icon-btn" id="menu-toggle"><i data-lucide="menu"></i></button>
+            <div class="model-selector-container">
+                <div class="model-selector" id="model-selector">
                     <span>TejGPT Fast</span>
                     <i data-lucide="chevron-down" size="16"></i>
-                    <div class="model-menu" id="model-dropdown">
-                        <div class="model-menu-item active" data-model="fast">
-                            <strong>Fast</strong>
-                            <span>Great for everyday tasks</span>
-                        </div>
-                        <div class="model-menu-item" data-model="advanced">
-                            <strong>Advanced</strong>
-                            <span>Our most capable model</span>
-                        </div>
+                </div>
+                <div class="model-menu" id="model-dropdown">
+                    <div class="model-menu-item active" data-model="fast">
+                        <strong>Fast</strong>
+                        <span>Great for everyday tasks</span>
+                    </div>
+                    <div class="model-menu-item" data-model="advanced">
+                        <strong>Advanced</strong>
+                        <span>Our most capable model</span>
                     </div>
                 </div>
-                
-                <div class="header-actions">
-                    <div class="badge">Upgrade</div>
-                    <div class="icon-btn"><i data-lucide="layout-grid" size="20"></i></div>
-                    <div class="user-avatar">T</div>
-                </div>
-            </header>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="icon-btn" id="profile-btn"><i data-lucide="user-circle"></i></button>
+        </div>
+    </header>
+
+    <!-- Auth Modal (Not Mandatory) -->
+    <div class="auth-modal-overlay" id="auth-modal">
+        <div class="auth-card">
+            <button class="auth-close" id="auth-close"><i data-lucide="x" size="20"></i></button>
+            <div class="auth-header">
+                <h2 id="auth-title">Welcome back</h2>
+                <p id="auth-subtitle">Login to save your personal preferences.</p>
+            </div>
+            <div class="auth-form" id="auth-form">
+                <input type="text" id="auth-username" placeholder="Username" autocomplete="off">
+                <input type="password" id="auth-password" placeholder="Password">
+                <button class="auth-action-btn" id="auth-submit">Sign In</button>
+            </div>
+            <div class="auth-footer" id="auth-footer">
+                Don't have an account? <span id="auth-toggle">Sign up</span>
+            </div>
+        </div>
+    </div>
 
             <div class="chat-container">
                 <div class="messages-list" id="messages-container">
