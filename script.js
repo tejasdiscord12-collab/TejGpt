@@ -173,20 +173,29 @@ function init() {
     }
 
     const handleGoogleAuth = async (btn) => {
-        btn.disabled = true;
-        const orgContent = btn.innerHTML;
-        btn.innerHTML = `<i data-lucide="loader" class="spin"></i> Redirecting...`;
-        if (window.lucide) lucide.createIcons();
-        
-        const { error } = await supabaseClient.auth.signInWithOAuth({
-            provider: 'google',
-            options: { redirectTo: window.location.origin }
-        });
-        
-        if (error) {
-            alert("Error: " + error.message);
+        try {
+            console.log("Google Auth triggered by:", btn.id);
+            btn.disabled = true;
+            const orgContent = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader" class="spin"></i> Connecting...`;
+            if (window.lucide) lucide.createIcons();
+            
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin }
+            });
+            
+            if (error) {
+                console.error("Supabase OAuth Error:", error);
+                alert("Auth Error: " + error.message);
+                btn.disabled = false;
+                btn.innerHTML = orgContent;
+            }
+        } catch (ex) {
+            console.error("Critical Auth Crash:", ex);
+            alert("Critical Error: " + ex.message);
             btn.disabled = false;
-            btn.innerHTML = orgContent;
+            btn.innerHTML = "Error-Retry";
         }
     };
 
