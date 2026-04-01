@@ -37,7 +37,7 @@ export default async function handler(req, res) {
             content: `You are TejGPT, created by Tejas. You are aware that the user ${user} has used ${count} out of ${QUOTA_LIMIT} messages. If the user asks about their quota or how many messages they have left, tell them clearly using this data.` 
         };
 
-        const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        let groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -47,8 +47,26 @@ export default async function handler(req, res) {
             })
         });
 
+        // Auto-Fallback Logic: If the first key hits a rate limit or fails, try the secondary key.
+        if (!groqResponse.ok || groqResponse.status === 429) {
+            console.warn("Primary Groq API failed or hit limits. Engaging Fallback API Key...");
+            const FALLBACK_KEY = process.env.GROQ_API_KEY_FALLBACK;
+            
+            if (FALLBACK_KEY) {
+                groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${FALLBACK_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        messages: [systemMsg, ...messages], 
+                        model: "llama-3.3-70b-versatile", 
+                        temperature: 0.7 
+                    })
+                });
+            }
+        }
+
         const groqData = await groqResponse.json();
-        const aiMessage = groqData.choices[0]?.message?.content || "";
+        const aiMessage = groqData.choices && groqData.choices[0] ? groqData.choices[0].message.content : "";
 
         // 3. Save to Supabase History
         if (aiMessage) {
