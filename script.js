@@ -8,41 +8,37 @@ if (!userId) {
 }
 const sessionKey = `support_session_${userId}`;
 
-// DOM Elements
-const sidebar = document.getElementById('sidebar');
-const menuToggle = document.getElementById('menu-toggle');
-const chatInput = document.getElementById('chat-input');
-const sendBtn = document.getElementById('send-btn');
-const messagesContainer = document.getElementById('messages-container');
-const welcomeScreen = document.getElementById('welcome-screen');
-const newChatBtn = document.getElementById('new-chat');
-const historyList = document.getElementById('history-list');
-const settingsBtn = document.getElementById('settings-btn');
-const settingsMenu = document.getElementById('settings-menu');
+// DOM Elements - Using Safety Guards
+const get = (id) => document.getElementById(id);
+const sidebar = get('sidebar');
+const chatInput = get('chat-input');
+const sendBtn = get('send-btn');
+const messagesContainer = get('messages-container');
+const welcomeScreen = get('welcome-screen');
+const newChatBtn = get('new-chat');
+const historyList = get('history-list');
+const settingsBtn = get('settings-btn');
+const settingsMenu = get('settings-menu');
 const themeOpts = document.querySelectorAll('.theme-opt');
-const modelSelector = document.getElementById('model-selector');
-const modelDropdown = document.getElementById('model-dropdown');
+const modelSelector = get('model-selector');
+const modelDropdown = get('model-dropdown');
 const modelMenuItems = document.querySelectorAll('.model-menu-item');
-const uploadBtn = document.getElementById('upload-btn');
-const fileInput = document.getElementById('file-input');
-const previewArea = document.getElementById('preview-area');
-const imagePreview = document.getElementById('image-preview');
-const removePreview = document.getElementById('remove-preview');
-const micBtn = document.getElementById('mic-btn');
-const voiceOverlay = document.getElementById('voice-overlay');
-const cancelVoice = document.getElementById('cancel-voice');
+const uploadBtn = get('upload-btn');
+const fileInput = get('file-input');
+const previewArea = get('preview-area');
+const imagePreview = get('image-preview');
+const removePreview = get('remove-preview');
+const micBtn = get('mic-btn');
+const voiceOverlay = get('voice-overlay');
+const cancelVoice = get('cancel-voice');
 
 // Live Support Elements
-const liveSupportTrigger = document.getElementById('live-support-trigger');
-const supportWidget = document.getElementById('support-widget');
-const supportClose = document.getElementById('support-close');
-const supportSend = document.getElementById('support-send');
-const supportInput = document.getElementById('support-input');
-const supportMessages = document.getElementById('support-messages');
-
-// Show User ID in Header for Staff Identification
-const supportHeaderLabel = document.querySelector('.support-header div div div:first-child');
-if (supportHeaderLabel) supportHeaderLabel.textContent = `TejGPT Support (${userId})`;
+const liveSupportTrigger = get('live-support-trigger');
+const supportWidget = get('support-widget');
+const supportClose = get('support-close');
+const supportSend = get('support-send');
+const supportInput = get('support-input');
+const supportMessages = get('support-messages');
 
 // State
 let chatHistory = [];
@@ -52,107 +48,143 @@ let attachedImage = null;
 
 // Initialization
 function init() {
-    chatInput.addEventListener('input', updateInputArea);
-    chatInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            submitMessage();
+    if (chatInput) {
+        chatInput.addEventListener('input', updateInputArea);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submitMessage();
+            }
+        });
+    }
+
+    if (sendBtn) sendBtn.addEventListener('click', submitMessage);
+    if (newChatBtn) newChatBtn.addEventListener('click', startNewChat);
+
+    // Sidebar Toggles
+    const sidebarToggle = get('sidebar-toggle-btn');
+    const headerMenuToggle = get('header-menu-toggle');
+    
+    const toggleSidebarFunc = () => {
+        if (sidebar) {
+            sidebar.classList.toggle('collapsed');
+            if (window.innerWidth < 768) sidebar.classList.toggle('open');
         }
-    });
+    };
 
-    sendBtn.addEventListener('click', submitMessage);
-    newChatBtn.addEventListener('click', startNewChat);
-
-    menuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        if (window.innerWidth < 768) sidebar.classList.toggle('open');
-    });
+    if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebarFunc);
+    if (headerMenuToggle) headerMenuToggle.addEventListener('click', toggleSidebarFunc);
 
     setupTheme();
-    settingsBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        settingsMenu.classList.toggle('active');
-    });
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (settingsMenu) settingsMenu.classList.toggle('active');
+        });
+    }
 
     themeOpts.forEach(opt => {
         opt.addEventListener('click', () => applyTheme(opt.dataset.themeVal));
     });
 
-    modelSelector.addEventListener('click', (e) => {
-        e.stopPropagation();
-        modelDropdown.classList.toggle('active');
-    });
+    if (modelSelector) {
+        modelSelector.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (modelDropdown) modelDropdown.classList.toggle('active');
+        });
+    }
 
     modelMenuItems.forEach(item => {
         item.addEventListener('click', () => {
             appModel = item.dataset.model;
-            document.querySelector('#model-selector span').textContent = `TejGPT ${item.querySelector('strong').textContent}`;
+            const label = document.querySelector('#model-selector span');
+            if (label) label.textContent = `TejGPT ${item.querySelector('strong').textContent}`;
             modelMenuItems.forEach(mi => mi.classList.remove('active'));
             item.classList.add('active');
-            modelDropdown.classList.remove('active');
+            if (modelDropdown) modelDropdown.classList.remove('active');
         });
     });
 
-    uploadBtn.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (re) => {
-                imagePreview.src = re.target.result;
-                attachedImage = re.target.result;
-                previewArea.style.display = 'block';
-                updateInputArea();
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+    if (uploadBtn) uploadBtn.addEventListener('click', () => fileInput.click());
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (re) => {
+                    if (imagePreview) imagePreview.src = re.target.result;
+                    attachedImage = re.target.result;
+                    if (previewArea) previewArea.style.display = 'block';
+                    updateInputArea();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
 
-    removePreview.addEventListener('click', () => {
-        attachedImage = null;
-        previewArea.style.display = 'none';
-        fileInput.value = '';
-        updateInputArea();
-    });
-
-    micBtn.addEventListener('click', () => {
-        voiceOverlay.classList.add('active');
-        setTimeout(() => {
-            voiceOverlay.classList.remove('active');
-            chatInput.value = "What can you help me with today?";
+    if (removePreview) {
+        removePreview.addEventListener('click', () => {
+            attachedImage = null;
+            if (previewArea) previewArea.style.display = 'none';
+            if (fileInput) fileInput.value = '';
             updateInputArea();
-        }, 2500);
-    });
+        });
+    }
 
-    cancelVoice.addEventListener('click', () => voiceOverlay.classList.remove('active'));
+    if (micBtn) {
+        micBtn.addEventListener('click', () => {
+            if (voiceOverlay) voiceOverlay.classList.add('active');
+            setTimeout(() => {
+                if (voiceOverlay) voiceOverlay.classList.remove('active');
+                if (chatInput) chatInput.value = "What can you help me with today?";
+                updateInputArea();
+            }, 2500);
+        });
+    }
 
-    document.getElementById('clear-history-btn').addEventListener('click', () => {
-        if (confirm('Clear all chat conversations?')) {
-            startNewChat();
-            const items = historyList.querySelectorAll('.history-item');
-            items.forEach(i => i.remove());
-            settingsMenu.classList.remove('active');
+    if (cancelVoice) cancelVoice.addEventListener('click', () => voiceOverlay.classList.remove('active'));
+
+    const clearBtn = get('clear-history-btn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Clear all chat conversations?')) {
+                startNewChat();
+                const items = historyList.querySelectorAll('.history-item');
+                items.forEach(i => i.remove());
+                if (settingsMenu) settingsMenu.classList.remove('active');
+            }
+        });
+    }
+
+    // --- SUPABASE & AUTH SYSTEM ---
+    const SUPABASE_PROJECT_URL = 'https://pzxthufcjbohwxsbdsvd.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6eHRodWZjamJvaHd4c2Jkc3ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMjcxNDgsImV4cCI6MjA5MDYwMzE0OH0.zKAaO2SUTddSXoJmuZnYw8apj9gWJXaap9RYt0D0RIw';
+    
+    let supabaseClient = null;
+    try {
+        if (typeof supabase !== 'undefined') {
+            supabaseClient = supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+        } else {
+            console.warn("Supabase SDK not loaded yet. Retrying in 2 seconds...");
         }
-    });
+    } catch (e) {
+        console.error("Supabase Init Error:", e);
+    }
 
-    // Supabase Client for Client-side Auth
-    const supabaseClient = supabase.createClient('https://pzxthufcjbohwxsbdsvd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6eHRodWZjamJvaHd4c2Jkc3ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMjcxNDgsImV4cCI6MjA5MDYwMzE0OH0.zKAaO2SUTddSXoJmuZnYw8apj9gWJXaap9RYt0D0RIw');
-
-    // Auth Logic
-    const profileBtn = document.getElementById('profile-btn');
-    const googleLoginBtn = document.getElementById('google-login');
-    const googleLoginWelcomeBtn = document.getElementById('google-login-welcome');
-    const authModal = document.getElementById('auth-modal');
-    const authClose = document.getElementById('auth-close');
-    const authSubmit = document.getElementById('auth-submit');
-    const authToggle = document.getElementById('auth-toggle');
-    const authTitle = document.getElementById('auth-title');
-    const authSubtitle = document.getElementById('auth-subtitle');
-    const authUserText = document.getElementById('auth-username');
-    const authPassText = document.getElementById('auth-password');
-    const loginHeaderBtn = document.getElementById('login-btn-header');
-    const authHeaderContainer = document.getElementById('auth-header-container');
-    const welcomeAuthContainer = document.getElementById('welcome-auth-container');
+    const profileBtn = get('profile-btn');
+    const googleLoginBtn = get('google-login');
+    const googleLoginWelcomeBtn = get('google-login-welcome');
+    const authModal = get('auth-modal');
+    const authClose = get('auth-close');
+    const authSubmit = get('auth-submit');
+    const authToggle = get('auth-toggle');
+    const authTitle = get('auth-title');
+    const authSubtitle = get('auth-subtitle');
+    const authUserText = get('auth-username');
+    const authPassText = get('auth-password');
+    const loginHeaderBtn = get('login-btn-header');
+    const authHeaderContainer = get('auth-header-container');
+    const welcomeAuthContainer = get('welcome-auth-container');
     let isSignupMode = false;
 
     function updateAuthState() {
@@ -173,8 +205,11 @@ function init() {
     }
 
     const handleGoogleAuth = async (btn) => {
+        if (!supabaseClient) {
+            alert("Error: Supabase is still loading. Please refresh and try again in 3 seconds.");
+            return;
+        }
         try {
-            console.log("Google Auth triggered by:", btn.id);
             btn.disabled = true;
             const orgContent = btn.innerHTML;
             btn.innerHTML = `<i data-lucide="loader" class="spin"></i> Connecting...`;
@@ -186,66 +221,58 @@ function init() {
             });
             
             if (error) {
-                console.error("Supabase OAuth Error:", error);
                 alert("Auth Error: " + error.message);
                 btn.disabled = false;
                 btn.innerHTML = orgContent;
             }
         } catch (ex) {
-            console.error("Critical Auth Crash:", ex);
             alert("Critical Error: " + ex.message);
             btn.disabled = false;
-            btn.innerHTML = "Error-Retry";
         }
     };
 
     if (googleLoginBtn) googleLoginBtn.addEventListener('click', () => handleGoogleAuth(googleLoginBtn));
     if (googleLoginWelcomeBtn) googleLoginWelcomeBtn.addEventListener('click', () => handleGoogleAuth(googleLoginWelcomeBtn));
 
-    authToggle.addEventListener('click', () => {
-        isSignupMode = !isSignupMode;
-        authTitle.textContent = isSignupMode ? "Create account" : "Welcome back";
-        authSubtitle.textContent = isSignupMode ? "Join the future of intelligence." : "Login to save your personal preferences.";
-        authSubmit.textContent = isSignupMode ? "Sign Up" : "Sign In";
-        authToggle.innerHTML = isSignupMode ? "Already have an account? <span>Sign in</span>" : "Don't have an account? <span>Sign up</span>";
-    });
-
-    authSubmit.addEventListener('click', async () => {
-        const username = authUserText.value.trim();
-        const password = authPassText.value.trim();
-        if (username && password) {
-            authSubmit.disabled = true;
-            authSubmit.textContent = isSignupMode ? "Signing Up..." : "Logging In...";
-            
-            try {
-                const res = await fetch('/api/auth', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: isSignupMode ? 'signup' : 'login', username, password })
-                });
-
-                const data = await res.json();
-                if (data.error) throw new Error(data.error);
-
-                localStorage.setItem('tejgpt_user', username);
-                authModal.classList.remove('active');
-                updateAuthState();
-                alert(isSignupMode ? `Welcome abroad, ${username}!` : `Welcome back, ${username}!`);
-            } catch (err) {
-                alert(`Auth Error: ${err.message}`);
-            } finally {
-                authSubmit.disabled = false;
-                authSubmit.textContent = isSignupMode ? "Sign Up" : "Sign In";
-            }
-        }
-    });
-
-    if (loginHeaderBtn) {
-        loginHeaderBtn.addEventListener('click', () => {
-            authModal.classList.add('active');
+    if (authToggle) {
+        authToggle.addEventListener('click', () => {
+            isSignupMode = !isSignupMode;
+            authTitle.textContent = isSignupMode ? "Create account" : "Welcome back";
+            authSubtitle.textContent = isSignupMode ? "Join the future of intelligence." : "Login to save your personal preferences.";
+            authSubmit.textContent = isSignupMode ? "Sign Up" : "Sign In";
+            authToggle.innerHTML = isSignupMode ? "Already have an account? <span>Sign in</span>" : "Don't have an account? <span>Sign up</span>";
         });
     }
 
+    if (authSubmit) {
+        authSubmit.addEventListener('click', async () => {
+            const username = authUserText.value.trim();
+            const password = authPassText.value.trim();
+            if (username && password) {
+                authSubmit.disabled = true;
+                authSubmit.textContent = isSignupMode ? "Signing Up..." : "Logging In...";
+                try {
+                    const res = await fetch('/api/auth', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: isSignupMode ? 'signup' : 'login', username, password })
+                    });
+                    const data = await res.json();
+                    if (data.error) throw new Error(data.error);
+                    localStorage.setItem('tejgpt_user', username);
+                    authModal.classList.remove('active');
+                    updateAuthState();
+                } catch (err) {
+                    alert(`Auth Error: ${err.message}`);
+                } finally {
+                    authSubmit.disabled = false;
+                    authSubmit.textContent = isSignupMode ? "Sign Up" : "Sign In";
+                }
+            }
+        });
+    }
+
+    if (loginHeaderBtn) loginHeaderBtn.addEventListener('click', () => authModal.classList.add('active'));
     if (profileBtn) {
         profileBtn.addEventListener('click', () => {
             const currentUser = localStorage.getItem('tejgpt_user');
@@ -255,56 +282,40 @@ function init() {
             }
         });
     }
+    if (authClose) authClose.addEventListener('click', () => authModal.classList.remove('active'));
 
-    authClose.addEventListener('click', () => authModal.classList.remove('active'));
-
-    updateAuthState(); // Initialize on load
+    updateAuthState();
 
     // Support Trigger
-    liveSupportTrigger.addEventListener('click', () => {
-        supportWidget.classList.add('active');
-        if (window.innerWidth < 768) sidebar.classList.remove('open');
-        
-        if (!localStorage.getItem(sessionKey)) {
-            localStorage.setItem(sessionKey, JSON.stringify([]));
-        }
-        
-        // Initial bot greeting if brand new
-        if (supportMessages.querySelectorAll('.support-msg:not(.bot-welcome)').length === 0) {
-            setTimeout(() => {
-                addSupportMessage("Connecting to a live agent...", "bot", true);
-            }, 500);
-        }
-    });
+    if (liveSupportTrigger) {
+        liveSupportTrigger.addEventListener('click', () => {
+            if (supportWidget) supportWidget.classList.add('active');
+            if (window.innerWidth < 768 && sidebar) sidebar.classList.remove('open');
+        });
+    }
+    if (supportClose) supportClose.addEventListener('click', () => supportWidget.classList.remove('active'));
+    if (supportSend) supportSend.addEventListener('click', handleSupportSend);
+    if (supportInput) {
+        supportInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleSupportSend();
+        });
+    }
 
-    supportClose.addEventListener('click', () => supportWidget.classList.remove('active'));
-
-    supportSend.addEventListener('click', handleSupportSend);
-    supportInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') handleSupportSend();
-    });
-
-    // Start sync interval
     setInterval(syncSupportMessages, 1000);
-    
-    // Cross-tab storage listener for instant updates
     window.addEventListener('storage', (e) => {
         if (e.key === sessionKey) syncSupportMessages();
     });
 
     document.addEventListener('click', (e) => {
-        if (!settingsMenu.contains(e.target) && !settingsBtn.contains(e.target)) settingsMenu.classList.remove('active');
-        if (modelSelector && !modelSelector.contains(e.target)) modelDropdown.classList.remove('active');
+        if (settingsMenu && settingsBtn && !settingsMenu.contains(e.target) && !settingsBtn.contains(e.target)) settingsMenu.classList.remove('active');
+        if (modelSelector && modelDropdown && !modelSelector.contains(e.target)) modelDropdown.classList.remove('active');
     });
 
-    chatInput.focus();
+    if (chatInput) chatInput.focus();
 }
 
 function setupTheme() {
     applyTheme(appTheme, false);
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-        if (appTheme === 'system') applyTheme('system', false);
-    });
 }
 
 function applyTheme(theme, save = true) {
@@ -316,26 +327,21 @@ function applyTheme(theme, save = true) {
 }
 
 function updateInputArea() {
-    chatInput.style.height = 'auto';
-    chatInput.style.height = (chatInput.scrollHeight) + 'px';
-    sendBtn.disabled = chatInput.value.trim() === '' && !attachedImage;
+    if (chatInput) {
+        chatInput.style.height = 'auto';
+        chatInput.style.height = (chatInput.scrollHeight) + 'px';
+        if (sendBtn) sendBtn.disabled = chatInput.value.trim() === '' && !attachedImage;
+    }
 }
 
 async function submitMessage() {
     const text = chatInput.value.trim();
     if (!text && !attachedImage) return;
 
-    // Detection for image generation
-    const textLower = text.toLowerCase();
-    const imageNouns = ['image', 'picture', 'photo', 'sketch', 'painting', 'drawing', 'illustration', 'wallpaper'];
-    const generationVerbs = ['generate', 'create', 'draw', 'make', 'show', 'paint'];
-    const isRequestingImage = textLower.startsWith('image:') || 
-                              (generationVerbs.some(v => textLower.includes(v)) && imageNouns.some(n => textLower.includes(n)));
-
     chatInput.value = '';
     chatInput.style.height = 'auto';
     sendBtn.disabled = true;
-    previewArea.style.display = 'none';
+    if (previewArea) previewArea.style.display = 'none';
     attachedImage = null;
 
     if (welcomeScreen) welcomeScreen.style.display = 'none';
@@ -343,44 +349,18 @@ async function submitMessage() {
     const aiBox = renderMessage('', 'ai', true);
     
     try {
-        if (isRequestingImage) {
-            let prompt = text.replace(/^(generate|create|draw|make|sketch|show|paint|image|picture)(\s*(image|picture|of|a|an|me|give|the))*\b\s*[:]?\s*/gi, "").trim();
-            if (prompt.length < 3) prompt = text.trim();
-            if (prompt.length < 2) prompt = "a beautiful landscape";
-            
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 999999)}&model=flux`;
-            const steps = ["Interpreting prompt...", "Connecting engine...", "Synthesizing...", "Lighting...", "Finalizing..."];
-            let stepIndex = 0;
-            const pt = setInterval(() => {
-                if (stepIndex < steps.length) {
-                    aiBox.innerHTML = `<div>${steps[stepIndex]}</div>`;
-                    stepIndex++;
-                } else clearInterval(pt);
-            }, 800);
-            
-            const img = new Image();
-            img.src = imageUrl;
-            img.onload = () => {
-                clearInterval(pt);
-                aiBox.innerHTML = `<img src="${imageUrl}" style="width:100%; border-radius:12px; border:1px solid var(--border);">`;
-            };
-        } else {
-            const response = await callGroqAPI(text);
-            streamResponse(aiBox, response);
-        }
+        const response = await callGroqAPI(text);
+        streamResponse(aiBox, response);
         addHistoryTab(text);
     } catch (err) {
-            aiBox.innerHTML = `<span>Error: ${err.message}</span>`;
+        aiBox.innerHTML = `<span>Error: ${err.message}</span>`;
     }
 }
 
 async function callGroqAPI(prompt) {
     const currentUser = localStorage.getItem('tejgpt_user') || "guest";
     const messages = [
-        { 
-            role: "system", 
-            content: "You are TejGPT, a professional and highly advanced AI assistant. You were created and developed by Tejas. If anyone asks who created you or who made you, you must always state clearly that Tejas is your creator." 
-        },
+        { role: "system", content: "You are TejGPT, created by Tejas. Your quota is 15 chats." },
         ...chatHistory.slice(-10),
         { role: "user", content: prompt }
     ];
@@ -393,12 +373,11 @@ async function callGroqAPI(prompt) {
 
     if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || 'API Bridge Error: Check Vercel Logs');
+        throw new Error(errorData.error || 'Quota Meta Limit');
     }
     
     const data = await res.json();
     const content = data.choices[0]?.message?.content || "";
-    
     chatHistory.push({ role: "user", content: prompt }, { role: "assistant", content: content });
     return content;
 }
@@ -430,67 +409,44 @@ function streamResponse(element, fullText) {
     }, 15);
 }
 
-    function addSupportMessage(text, role, save = false) {
-        if (!text) return;
-        const msg = document.createElement('div');
-        
-        if (role === 'staff') {
-            msg.className = `support-msg staff-msg-container`;
-            msg.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                    <div class="staff-avatar-circle">T</div>
-                    <div class="staff-header-info">Tejas (Staff)</div>
-                </div>
-                <div class="staff-bubble-content">${text}</div>
-            `;
-        } else {
-            msg.className = `support-msg ${role}`;
-            msg.textContent = text;
-        }
-        
+function addSupportMessage(text, role, save = false) {
+    if (!text) return;
+    const msg = document.createElement('div');
+    msg.className = `support-msg ${role}`;
+    msg.textContent = text;
+    if (supportMessages) {
         supportMessages.appendChild(msg);
         supportMessages.scrollTop = supportMessages.scrollHeight;
+    }
+    if (save) {
+        const msgs = JSON.parse(localStorage.getItem(sessionKey) || '[]');
+        msgs.push({ role, text, timestamp: Date.now() });
+        localStorage.setItem(sessionKey, JSON.stringify(msgs));
+    }
+}
 
-        if (save) {
-            const msgs = JSON.parse(localStorage.getItem(sessionKey) || '[]');
-            msgs.push({ role: role, text: text, timestamp: Date.now() });
-            localStorage.setItem(sessionKey, JSON.stringify(msgs));
+function syncSupportMessages() {
+    const stored = JSON.parse(localStorage.getItem(sessionKey) || '[]');
+    const currentCount = supportMessages ? supportMessages.querySelectorAll('.support-msg').length : 0;
+    if (stored.length > currentCount) {
+        for (let i = currentCount; i < stored.length; i++) {
+            addSupportMessage(stored[i].text, stored[i].role);
         }
     }
-
-    function syncSupportMessages() {
-        const stored = JSON.parse(localStorage.getItem(sessionKey) || '[]');
-        const currentCount = supportMessages.querySelectorAll('.support-msg:not(.bot-welcome)').length;
-        if (stored.length > currentCount) {
-            for (let i = currentCount; i < stored.length; i++) {
-                addSupportMessage(stored[i].text, stored[i].role);
-                
-                // End session check
-                if (stored[i].isEnd) {
-                    setTimeout(() => {
-                        supportWidget.classList.remove('active');
-                        supportMessages.innerHTML = `
-                            <div class="support-msg bot bot-welcome">Hi Tejas! How can I help you today? I'm the official TejGPT Support Bot.</div>
-                        `;
-                        sessionStorage.removeItem('support_notified');
-                    }, 3000);
-                }
-            }
-        }
-    }
+}
 
 function handleSupportSend() {
     const text = supportInput.value.trim();
     if (!text) return;
     const messages = JSON.parse(localStorage.getItem(sessionKey) || '[]');
-    messages.push({ role: 'user', text: text, timestamp: Date.now() });
+    messages.push({ role: 'user', text, timestamp: Date.now() });
     localStorage.setItem(sessionKey, JSON.stringify(messages));
     supportInput.value = '';
     syncSupportMessages();
 }
 
 function startNewChat() {
-    messagesContainer.innerHTML = '';
+    if (messagesContainer) messagesContainer.innerHTML = '';
     if (welcomeScreen) welcomeScreen.style.display = 'block';
     chatHistory = [];
 }
@@ -501,9 +457,11 @@ function addHistoryTab(text) {
     tab.className = 'history-item';
     tab.innerHTML = `<i data-lucide="message-square" size="14"></i> <span class="nav-text">${text}</span>`;
     tab.onclick = () => setInput(text);
-    const label = historyList.querySelector('.history-section-label');
-    if (label && label.nextSibling) historyList.insertBefore(tab, label.nextSibling);
-    else historyList.appendChild(tab);
+    if (historyList) {
+        const label = historyList.querySelector('.history-section-label');
+        if (label && label.nextSibling) historyList.insertBefore(tab, label.nextSibling);
+        else historyList.appendChild(tab);
+    }
     if (window.lucide) lucide.createIcons();
 }
 
@@ -516,9 +474,11 @@ function md(raw) {
 }
 
 window.setInput = (text) => {
-    chatInput.value = text;
-    updateInputArea();
-    submitMessage();
+    if (chatInput) {
+        chatInput.value = text;
+        updateInputArea();
+        submitMessage();
+    }
 };
 
 init();
