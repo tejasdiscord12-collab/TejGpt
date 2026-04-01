@@ -33,7 +33,22 @@
     </style>
 </head>
 <body class="light-theme">
-    <div class="staff-layout">
+    <!-- Staff Login Gatekeeper -->
+    <div id="staff-gatekeeper" style="position: fixed; inset: 0; background: var(--bg-main); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+        <div style="width: 100%; max-width: 400px; background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); padding: 2.5rem; text-align: center;">
+            <div style="width: 64px; height: 64px; background: var(--accent); border-radius: 16px; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; color: white;">
+                <i data-lucide="shield-check" size="32"></i>
+            </div>
+            <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">Staff Access</h1>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 2rem;">Please enter your private staff key to unlock the command center.</p>
+            
+            <input type="password" id="gate-key" placeholder="Enter Staff Key" style="width: 100%; padding: 12px 20px; border-radius: 10px; border: 1px solid #ddd; outline: none; margin-bottom: 1rem; font-family: inherit;">
+            <button id="gate-enter" style="width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">Unlock Dashboard</button>
+            <div id="gate-error" style="color: var(--error); font-size: 0.8rem; margin-top: 1rem; display: none;">Invalid Access Key. Access Denied.</div>
+        </div>
+    </div>
+
+    <div class="staff-layout" id="staff-content" style="visibility: hidden;">
         <aside class="staff-sidebar">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 2rem;">
                 <div style="width: 32px; height: 32px; background: var(--accent); border-radius: 8px;"></div>
@@ -192,15 +207,41 @@
             }
         }
 
-        document.getElementById('reply-send-btn').addEventListener('click', sendReply);
-        document.getElementById('reply-input').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') sendReply();
+        // --- GATEKEEPER LOGIC ---
+        const MASTER_KEY = "tejas-admin-2024";
+        const gateInput = document.getElementById('gate-key');
+        const gateEnter = document.getElementById('gate-enter');
+        const gateUI = document.getElementById('staff-gatekeeper');
+        const staffUI = document.getElementById('staff-content');
+        const gateError = document.getElementById('gate-error');
+
+        function checkAuth() {
+            if (sessionStorage.getItem('staff_auth') === 'true') {
+                gateUI.style.display = 'none';
+                staffUI.style.visibility = 'visible';
+            }
+        }
+
+        gateEnter.addEventListener('click', () => {
+            if (gateInput.value === MASTER_KEY) {
+                sessionStorage.setItem('staff_auth', 'true');
+                gateUI.style.display = 'none';
+                staffUI.style.visibility = 'visible';
+            } else {
+                gateError.style.display = 'block';
+                setTimeout(() => gateError.style.display = 'none', 3000);
+            }
         });
+
+        gateInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') gateEnter.click(); });
+        checkAuth();
 
         // Polling for real-time updates
         setInterval(() => {
-            refreshSessions();
-            if (activeSessionId) loadActiveMessages();
+            if (sessionStorage.getItem('staff_auth') === 'true') {
+                refreshSessions();
+                if (activeSessionId) loadActiveMessages();
+            }
         }, 1000);
 
         refreshSessions();
