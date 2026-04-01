@@ -145,26 +145,40 @@ function init() {
     const authSubtitle = document.getElementById('auth-subtitle');
     const authUserText = document.getElementById('auth-username');
     const authPassText = document.getElementById('auth-password');
+    const loginHeaderBtn = document.getElementById('login-btn-header');
+    const authHeaderContainer = document.getElementById('auth-header-container');
     let isSignupMode = false;
 
-    // Personal Greeting
-    const userName = localStorage.getItem('tejgpt_user');
-    if (userName) {
-        const welcomeTitle = document.querySelector('.welcome-screen h1');
-        if (welcomeTitle) welcomeTitle.textContent = `Hello, ${userName}`;
-    }
-
-    profileBtn.addEventListener('click', () => {
+    function updateAuthState() {
         const currentUser = localStorage.getItem('tejgpt_user');
         if (currentUser) {
-            if (confirm(`Logged in as ${currentUser}. Log out?`)) {
+            if (authHeaderContainer) authHeaderContainer.style.display = 'none';
+            if (profileBtn) profileBtn.style.display = 'flex';
+            const welcomeTitle = document.querySelector('.welcome-screen h1');
+            if (welcomeTitle) welcomeTitle.textContent = `Hello, ${currentUser}`;
+        } else {
+            if (authHeaderContainer) authHeaderContainer.style.display = 'block';
+            if (profileBtn) profileBtn.style.display = 'none';
+            const welcomeTitle = document.querySelector('.welcome-screen h1');
+            if (welcomeTitle) welcomeTitle.textContent = `Hello, I am TejGPT`;
+        }
+    }
+
+    if (loginHeaderBtn) {
+        loginHeaderBtn.addEventListener('click', () => {
+            authModal.classList.add('active');
+        });
+    }
+
+    if (profileBtn) {
+        profileBtn.addEventListener('click', () => {
+            const currentUser = localStorage.getItem('tejgpt_user');
+            if (confirm(`Logged in as ${currentUser}. Sign out?`)) {
                 localStorage.removeItem('tejgpt_user');
                 location.reload();
             }
-        } else {
-            authModal.classList.add('active');
-        }
-    });
+        });
+    }
 
     authClose.addEventListener('click', () => authModal.classList.remove('active'));
 
@@ -176,15 +190,37 @@ function init() {
         authToggle.innerHTML = isSignupMode ? "Already have an account? <span>Sign in</span>" : "Don't have an account? <span>Sign up</span>";
     });
 
-    authSubmit.addEventListener('click', () => {
-        const name = authUserText.value.trim();
-        const pass = authPassText.value.trim();
-        if (name && pass) {
-            localStorage.setItem('tejgpt_user', name);
-            authModal.classList.remove('active');
-            location.reload();
+    authSubmit.addEventListener('click', async () => {
+        const username = authUserText.value.trim();
+        const password = authPassText.value.trim();
+        if (username && password) {
+            authSubmit.disabled = true;
+            authSubmit.textContent = isSignupMode ? "Signing Up..." : "Logging In...";
+            
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: isSignupMode ? 'signup' : 'login', username, password })
+                });
+
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+
+                localStorage.setItem('tejgpt_user', username);
+                authModal.classList.remove('active');
+                updateAuthState();
+                alert(isSignupMode ? `Welcome abroad, ${username}!` : `Welcome back, ${username}!`);
+            } catch (err) {
+                alert(`Auth Error: ${err.message}`);
+            } finally {
+                authSubmit.disabled = false;
+                authSubmit.textContent = isSignupMode ? "Sign Up" : "Sign In";
+            }
         }
     });
+
+    updateAuthState();
 
     // Support Trigger
     liveSupportTrigger.addEventListener('click', () => {
