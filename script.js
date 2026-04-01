@@ -364,21 +364,38 @@ async function callGroqAPI(prompt) {
         { role: "user", content: prompt }
     ];
 
-    const res = await fetch('/api/chat', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ messages, user: currentUser }) 
-    });
+    let res;
+    try {
+        res = await fetch('/api/chat', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ messages, user: currentUser }) 
+        });
+    } catch (fetchError) {
+        throw new Error("Cannot reach the AI network. Are you testing on Vercel?");
+    }
 
     if (!res.ok) {
-        const errorData = await res.json();
+        let errorData;
+        try {
+            errorData = await res.json();
+        } catch (parseError) {
+            throw new Error(`Local Server Detected. The AI Brain only works on Vercel. Please test on your Live site!`);
+        }
+        
         // If Quota Over (403), return the custom message to be displayed as AI text.
         if (res.status === 403) return errorData.error;
-        throw new Error(errorData.error || 'Quota Meta Limit');
+        throw new Error(errorData.error || 'Backend API limit reached.');
     }
     
-    const data = await res.json();
-    const content = data.choices[0]?.message?.content || "";
+    let data;
+    try {
+        data = await res.json();
+    } catch (parseError) {
+        throw new Error(`Data format error. Please test on your Live Vercel site!`);
+    }
+
+    const content = data.choices && data.choices[0] ? data.choices[0].message.content : "";
     
     chatHistory.push({ role: "user", content: prompt }, { role: "assistant", content: content });
     return content;
