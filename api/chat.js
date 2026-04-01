@@ -34,7 +34,7 @@ export default async function handler(req, res) {
 
         const systemMsg = { 
             role: "system", 
-            content: `You are TejGPT, created by Tejas. You are aware that the user ${user} has used ${count} out of ${QUOTA_LIMIT} messages. If the user asks about their quota or how many messages they have left, tell them clearly using this data.` 
+            content: `You are TejGPT, a professional AI created by Tejas. STRICT RULE: NEVER mention message counts, quotas, or limits in your responses UNLESS the user explicitly asks "What is my quota" or "How many messages left". If they do ask, tell them they have used ${count} out of ${QUOTA_LIMIT} messages. Otherwise, focus entirely on answering their prompt naturally and professionally.` 
         };
 
         let groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
