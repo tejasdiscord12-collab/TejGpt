@@ -136,8 +136,7 @@ function init() {
     });
 
     // Supabase Client for Client-side Auth
-    // NOTE: Replace 'YOUR_ANON_KEY' with your real Supabase 'anon' key (starts with eyJ...)
-    const supabaseClient = supabase.createClient('https://pzxthufcjbohwxsbdsvd.supabase.co', 'YOUR_ANON_KEY');
+    const supabaseClient = supabase.createClient('https://pzxthufcjbohwxsbdsvd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6eHRodWZjamJvaHd4c2Jkc3ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMjcxNDgsImV4cCI6MjA5MDYwMzE0OH0.zKAaO2SUTddSXoJmuZnYw8apj9gWJXaap9RYt0D0RIw');
 
     // Auth Logic
     const profileBtn = document.getElementById('profile-btn');
