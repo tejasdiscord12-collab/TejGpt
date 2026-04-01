@@ -370,11 +370,12 @@ async function submitMessage() {
         }
         addHistoryTab(text);
     } catch (err) {
-        aiBox.innerHTML = `<span>Error: ${err.message}</span>`;
+            aiBox.innerHTML = `<span>Error: ${err.message}</span>`;
     }
 }
 
 async function callGroqAPI(prompt) {
+    const currentUser = localStorage.getItem('tejgpt_user') || "guest";
     const messages = [
         { 
             role: "system", 
@@ -387,10 +388,13 @@ async function callGroqAPI(prompt) {
     const res = await fetch('/api/chat', { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ messages }) 
+        body: JSON.stringify({ messages, user: currentUser }) 
     });
 
-    if (!res.ok) throw new Error('API Bridge Error: Check Vercel Logs');
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'API Bridge Error: Check Vercel Logs');
+    }
     
     const data = await res.json();
     const content = data.choices[0]?.message?.content || "";
