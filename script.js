@@ -142,40 +142,51 @@ function init() {
     // Auth Logic
     const profileBtn = document.getElementById('profile-btn');
     const googleLoginBtn = document.getElementById('google-login');
+    const googleLoginWelcomeBtn = document.getElementById('google-login-welcome');
     const authModal = document.getElementById('auth-modal');
     const authClose = document.getElementById('auth-close');
     const loginHeaderBtn = document.getElementById('login-btn-header');
     const authHeaderContainer = document.getElementById('auth-header-container');
+    const welcomeAuthContainer = document.getElementById('welcome-auth-container');
 
     function updateAuthState() {
         const currentUser = localStorage.getItem('tejgpt_user');
         if (currentUser) {
             if (authHeaderContainer) authHeaderContainer.style.display = 'none';
             if (profileBtn) profileBtn.style.display = 'flex';
+            if (welcomeAuthContainer) welcomeAuthContainer.style.display = 'none';
             const welcomeTitle = document.querySelector('.welcome-screen h1');
             if (welcomeTitle) welcomeTitle.textContent = `Hello, ${currentUser}`;
         } else {
             if (authHeaderContainer) authHeaderContainer.style.display = 'block';
             if (profileBtn) profileBtn.style.display = 'none';
+            if (welcomeAuthContainer) welcomeAuthContainer.style.display = 'block';
             const welcomeTitle = document.querySelector('.welcome-screen h1');
             if (welcomeTitle) welcomeTitle.textContent = `Hello, I am TejGPT`;
         }
     }
 
-    if (googleLoginBtn) {
-        googleLoginBtn.addEventListener('click', async () => {
-            googleLoginBtn.disabled = true;
-            googleLoginBtn.textContent = "Redirecting...";
-            
-            const { data, error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: window.location.origin
-                }
-            });
-            
-            if (error) alert("Error: " + error.message);
+    const handleGoogleAuth = async (btn) => {
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader" class="spin"></i> Redirecting...`;
+        lucide.createIcons(); // Apply rotation animation icon if present
+        
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
         });
+        
+        if (error) alert("Error: " + error.message);
+    };
+
+    if (googleLoginBtn) {
+        googleLoginBtn.addEventListener('click', () => handleGoogleAuth(googleLoginBtn));
+    }
+
+    if (googleLoginWelcomeBtn) {
+        googleLoginWelcomeBtn.addEventListener('click', () => handleGoogleAuth(googleLoginWelcomeBtn));
     }
 
     if (loginHeaderBtn) {

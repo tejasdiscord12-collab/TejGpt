@@ -577,6 +577,28 @@ body {
     color: var(--accent);
 }
 
+.welcome-google-btn {
+    width: fit-content;
+    padding: 0.8rem 1.5rem;
+    margin: 1.5rem auto;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.welcome-google-btn:hover {
+    background: var(--bg-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.welcome-google-btn img {
+    pointer-events: none;
+}
+
 /* Stable Messages UI */
 .message-row {
     padding: 1.5rem 1rem;
