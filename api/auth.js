@@ -1,11 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-    'https://pzxthufcjbohwxsbdsvd.supabase.co',
-    process.env.SUPABASE_KEY
-);
+const supabaseUrl = 'https://pzxthufcjbohwxsbdsvd.supabase.co';
+const supabaseKey = process.env.SUPABASE_KEY;
 
 export default async function handler(req, res) {
+    if (!supabaseKey) {
+        return res.status(500).json({ error: 'Supabase Key is missing. Add SUPABASE_KEY to Vercel Environment Variables.' });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
     const { type, username, password } = req.body;
