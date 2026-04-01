@@ -159,7 +159,13 @@ function init() {
         if (e.key === 'Enter') handleSupportSend();
     });
 
+    // Start sync interval
     setInterval(syncSupportMessages, 1000);
+    
+    // Cross-tab storage listener for instant updates
+    window.addEventListener('storage', (e) => {
+        if (e.key === sessionKey) syncSupportMessages();
+    });
 
     document.addEventListener('click', (e) => {
         if (!settingsMenu.contains(e.target) && !settingsBtn.contains(e.target)) settingsMenu.classList.remove('active');
