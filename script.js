@@ -360,7 +360,6 @@ async function submitMessage() {
 async function callGroqAPI(prompt) {
     const currentUser = localStorage.getItem('tejgpt_user') || "guest";
     const messages = [
-        { role: "system", content: "You are TejGPT, created by Tejas. Your quota is 15 chats." },
         ...chatHistory.slice(-10),
         { role: "user", content: prompt }
     ];
@@ -373,11 +372,14 @@ async function callGroqAPI(prompt) {
 
     if (!res.ok) {
         const errorData = await res.json();
+        // If Quota Over (403), return the custom message to be displayed as AI text.
+        if (res.status === 403) return errorData.error;
         throw new Error(errorData.error || 'Quota Meta Limit');
     }
     
     const data = await res.json();
     const content = data.choices[0]?.message?.content || "";
+    
     chatHistory.push({ role: "user", content: prompt }, { role: "assistant", content: content });
     return content;
 }
