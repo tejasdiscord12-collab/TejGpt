@@ -118,38 +118,41 @@
 
             <div class="chat-container">
         <div class="messages-list" id="messages-container">
-            <div class="welcome-screen" id="welcome-screen">
-                <h1>Hello, I am TejGPT</h1>
-                <p>How can I help you today?</p>
-                
-                <div id="welcome-auth-container" style="text-align: center; margin: 2rem 0;">
-                    <button class="google-auth-btn welcome-google-btn" id="google-login-welcome">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="20">
-                        Continue with Google
-                    </button>
-                </div>
+            <!-- Welcome Screen -->
+            <div class="welcome-view" id="welcome-screen">
+                <div class="welcome-content">
+                    <h1>Hello, I am TejGPT</h1>
+                    <p class="subtitle">How can I help you today?</p>
+                    
+                    <div id="welcome-auth-container" style="margin: 2rem 0; display:flex; justify-content:center;">
+                        <button class="google-auth-btn-prime" id="google-login-welcome">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+                            Continue with Google
+                        </button>
+                    </div>
 
-                <div class="suggestion-grid">
-                    <div class="suggestion-card" onclick="setInput('Create an image of an astronaut riding a horse in space')">
-                        <i data-lucide="image"></i>
-                        <p>Create Image</p>
-                    </div>
-                    <div class="suggestion-card" onclick="setInput('Help me write a Python script to scrape a website')">
-                        <i data-lucide="code"></i>
-                        <p>Write code</p>
-                    </div>
-                    <div class="suggestion-card" onclick="setInput('Plan a 3-day trip to Tokyo on a budget')">
-                        <i data-lucide="map"></i>
-                        <p>Plan a trip</p>
-                    </div>
-                    <div class="suggestion-card" onclick="setInput('Draft a professional email to my boss about a promotion')">
-                        <i data-lucide="mail"></i>
-                        <p>Draft email</p>
+                    <div class="suggestion-grid">
+                        <div class="suggestion-card" onclick="setInput('Create an image of an astronaut riding a horse in space')">
+                            <i data-lucide="image"></i>
+                            <p>Create Image</p>
+                        </div>
+                        <div class="suggestion-card" onclick="setInput('Help me write a Python script to scrape a website')">
+                            <i data-lucide="code"></i>
+                            <p>Write code</p>
+                        </div>
+                        <div class="suggestion-card" onclick="setInput('Plan a 3-day trip to Tokyo on a budget')">
+                            <i data-lucide="map"></i>
+                            <p>Plan a trip</p>
+                        </div>
+                        <div class="suggestion-card" onclick="setInput('Draft a professional email to my boss about a promotion')">
+                            <i data-lucide="mail"></i>
+                            <p>Draft email</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-                   </div>
+                  </div>
                 </div>
 
                 <!-- Input Area -->

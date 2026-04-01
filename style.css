@@ -547,15 +547,70 @@ body {
 }
 
 .subtitle {
-    font-size: 1.5rem;
-    color: var(--text-med);
+/* Welcome View & Auth Button */
+.welcome-view {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.welcome-content {
+    max-width: 800px;
+    width: 100%;
+}
+
+.welcome-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-high);
+}
+
+.welcome-content .subtitle {
+    font-size: 1.1rem;
+    color: var(--text-low);
+    margin-bottom: 2.5rem;
+}
+
+.google-auth-btn-prime {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+    color: #1f1f1f;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     margin-bottom: 3rem;
 }
 
+.google-auth-btn-prime:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+    background: #fcfcfc;
+}
+
+.google-auth-btn-prime img {
+    width: 22px;
+    height: 22px;
+}
+
+/* Suggestion Grid */
 .suggestion-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
+    width: 100%;
 }
 
 .suggestion-card {
@@ -567,36 +622,6 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-}
-
-.suggestion-card:hover {
-    background-color: var(--bg-hover);
-}
-
-.suggestion-card i {
-    color: var(--accent);
-}
-
-.welcome-google-btn {
-    width: fit-content;
-    padding: 0.8rem 1.5rem;
-    margin: 1.5rem auto;
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.welcome-google-btn:hover {
-    background: var(--bg-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-.welcome-google-btn img {
-    pointer-events: none;
 }
 
 /* Stable Messages UI */
@@ -958,3 +983,4 @@ body {
 .dark-theme .support-msg.bot { background: #333; color: white; }
 .dark-theme .support-input-area { background: #1e1e1f; }
 .dark-theme .support-input-area input { background: #131314; color: white; }
+}

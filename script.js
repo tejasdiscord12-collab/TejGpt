@@ -155,30 +155,35 @@ function init() {
             if (authHeaderContainer) authHeaderContainer.style.display = 'none';
             if (profileBtn) profileBtn.style.display = 'flex';
             if (welcomeAuthContainer) welcomeAuthContainer.style.display = 'none';
-            const welcomeTitle = document.querySelector('.welcome-screen h1');
+            const welcomeTitle = document.querySelector('.welcome-view h1');
             if (welcomeTitle) welcomeTitle.textContent = `Hello, ${currentUser}`;
         } else {
             if (authHeaderContainer) authHeaderContainer.style.display = 'block';
             if (profileBtn) profileBtn.style.display = 'none';
             if (welcomeAuthContainer) welcomeAuthContainer.style.display = 'block';
-            const welcomeTitle = document.querySelector('.welcome-screen h1');
+            const welcomeTitle = document.querySelector('.welcome-view h1');
             if (welcomeTitle) welcomeTitle.textContent = `Hello, I am TejGPT`;
         }
     }
 
     const handleGoogleAuth = async (btn) => {
         btn.disabled = true;
+        const originalText = btn.innerHTML;
         btn.innerHTML = `<i data-lucide="loader" class="spin"></i> Redirecting...`;
-        lucide.createIcons(); // Apply rotation animation icon if present
+        if (window.lucide) lucide.createIcons();
         
-        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+        const { error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
             options: {
                 redirectTo: window.location.origin
             }
         });
         
-        if (error) alert("Error: " + error.message);
+        if (error) {
+            alert("Error: " + error.message);
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
     };
 
     if (googleLoginBtn) {
