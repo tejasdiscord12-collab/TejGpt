@@ -187,6 +187,45 @@ function init() {
     const welcomeAuthContainer = get('welcome-auth-container');
     let isSignupMode = false;
 
+    async function loadUserHistory(user) {
+        if (!supabaseClient) return;
+        try {
+            const { data, error } = await supabaseClient
+                .from('chats_history')
+                .select('*')
+                .eq('username', user);
+                
+            if (error) throw error;
+            
+            // Clear current screen
+            if (messagesContainer) messagesContainer.innerHTML = '';
+            chatHistory = [];
+            const historyLabels = historyList?.querySelectorAll('.history-item');
+            if (historyLabels) historyLabels.forEach(i => i.remove());
+
+            if (data && data.length > 0) {
+                if (welcomeScreen) welcomeScreen.style.display = 'none';
+                
+                // Add the welcome screen back at the top implicitly or just hide it
+                // We recreate the chat thread below
+                data.forEach(chat => {
+                    if (chat.prompt && chat.response) {
+                        renderMessage(chat.prompt, 'user');
+                        chatHistory.push({ role: 'user', content: chat.prompt });
+                        addHistoryTab(chat.prompt);
+                        
+                        renderMessage(chat.response, 'ai');
+                        chatHistory.push({ role: 'assistant', content: chat.response });
+                    }
+                });
+            } else {
+                if (welcomeScreen) welcomeScreen.style.display = 'block';
+            }
+        } catch (e) {
+            console.error("Failed to load chat history:", e);
+        }
+    }
+
     function updateAuthState() {
         const currentUser = localStorage.getItem('tejgpt_user');
         if (currentUser) {
@@ -195,12 +234,16 @@ function init() {
             if (welcomeAuthContainer) welcomeAuthContainer.style.display = 'none';
             const welcomeTitle = document.querySelector('.welcome-view h1');
             if (welcomeTitle) welcomeTitle.textContent = `Hello, ${currentUser}`;
+            
+            loadUserHistory(currentUser);
         } else {
             if (authHeaderContainer) authHeaderContainer.style.display = 'block';
             if (profileBtn) profileBtn.style.display = 'none';
             if (welcomeAuthContainer) welcomeAuthContainer.style.display = 'block';
             const welcomeTitle = document.querySelector('.welcome-view h1');
             if (welcomeTitle) welcomeTitle.textContent = `Hello, I am TejGPT`;
+            
+            startNewChat();
         }
     }
 
