@@ -164,20 +164,6 @@ function init() {
     try {
         if (typeof supabase !== 'undefined') {
             supabaseClient = supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
-            
-            // Listen for login/logout events from Google OAuth redirect
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                if (session && session.user) {
-                    const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email;
-                    localStorage.setItem('tejgpt_user', name);
-                    if (authModal) authModal.classList.remove('active');
-                    updateAuthState();
-                } else if (event === 'SIGNED_OUT') {
-                    localStorage.removeItem('tejgpt_user');
-                    updateAuthState();
-                }
-            });
-            
         } else {
             console.warn("Supabase SDK not loaded yet. Retrying in 2 seconds...");
         }
@@ -300,6 +286,31 @@ function init() {
         });
     }
     if (authClose) authClose.addEventListener('click', () => authModal.classList.remove('active'));
+
+    if (supabaseClient) {
+        // Handle Session Change
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            if (session && session.user) {
+                const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email;
+                localStorage.setItem('tejgpt_user', name);
+                if (authModal) authModal.classList.remove('active');
+                updateAuthState();
+            } else if (event === 'SIGNED_OUT') {
+                localStorage.removeItem('tejgpt_user');
+                updateAuthState();
+            }
+        });
+
+        // Ensure session resolves safely on load
+        supabaseClient.auth.getSession().then(({ data: { session } }) => {
+            if (session && session.user) {
+                const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email;
+                localStorage.setItem('tejgpt_user', name);
+                if (authModal) authModal.classList.remove('active');
+                updateAuthState();
+            }
+        });
+    }
 
     updateAuthState();
 
