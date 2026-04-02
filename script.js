@@ -164,6 +164,20 @@ function init() {
     try {
         if (typeof supabase !== 'undefined') {
             supabaseClient = supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+            
+            // Listen for login/logout events from Google OAuth redirect
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (session && session.user) {
+                    const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email;
+                    localStorage.setItem('tejgpt_user', name);
+                    if (authModal) authModal.classList.remove('active');
+                    updateAuthState();
+                } else if (event === 'SIGNED_OUT') {
+                    localStorage.removeItem('tejgpt_user');
+                    updateAuthState();
+                }
+            });
+            
         } else {
             console.warn("Supabase SDK not loaded yet. Retrying in 2 seconds...");
         }
@@ -274,9 +288,12 @@ function init() {
 
     if (loginHeaderBtn) loginHeaderBtn.addEventListener('click', () => authModal.classList.add('active'));
     if (profileBtn) {
-        profileBtn.addEventListener('click', () => {
+        profileBtn.addEventListener('click', async () => {
             const currentUser = localStorage.getItem('tejgpt_user');
             if (confirm(`Logged in as ${currentUser}. Sign out?`)) {
+                if (supabaseClient) {
+                    await supabaseClient.auth.signOut();
+                }
                 localStorage.removeItem('tejgpt_user');
                 location.reload();
             }
