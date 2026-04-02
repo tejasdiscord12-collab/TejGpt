@@ -6,61 +6,69 @@
     <title>TejGPT - Pro Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="light-theme">
+<body class="dark-theme">
+    <div class="app-background">
+        <div class="gradient-sphere sphere-1"></div>
+        <div class="gradient-sphere sphere-2"></div>
+        <div class="gradient-sphere sphere-3"></div>
+        <div class="noise-overlay"></div>
+    </div>
+    
     <div class="app-layout">
         <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
+        <aside class="sidebar glass-panel" id="sidebar">
             <div class="sidebar-top">
-                <button class="nav-icon-btn" id="sidebar-toggle-btn">
+                <button class="nav-icon-btn glow-hover" id="sidebar-toggle-btn">
                     <i data-lucide="menu"></i>
                 </button>
-                <button class="new-chat-btn" id="new-chat">
+                <button class="new-chat-btn premium-btn" id="new-chat">
                     <i data-lucide="plus"></i>
                     <span class="nav-text">New chat</span>
+                    <div class="btn-highlight"></div>
                 </button>
             </div>
             
             <div class="sidebar-history" id="history-list">
-                <div class="history-section-label nav-text">Recent</div>
+                <div class="history-section-label nav-text">Recent Intelligence</div>
             </div>
 
             <div class="sidebar-bottom">
-                <div class="nav-item" id="live-support-trigger">
-                    <i data-lucide="message-circle"></i>
+                <div class="nav-item glass-hover" id="live-support-trigger">
+                    <i data-lucide="message-circle" class="accent-icon"></i>
                     <span class="nav-text">Live Support</span>
                 </div>
-                <div class="nav-item" id="settings-btn">
+                <div class="nav-item glass-hover relative-menu-trigger" id="settings-btn">
                     <i data-lucide="settings"></i>
                     <span class="nav-text">Settings</span>
                 </div>
                 
-                <div class="settings-dropdown" id="settings-menu">
+                <div class="settings-dropdown glass-menu" id="settings-menu">
                     <div class="settings-section">
                         <div class="settings-label">Appearance</div>
                         <div class="theme-switch">
-                            <button class="theme-opt active" data-theme-val="light">Light</button>
-                            <button class="theme-opt" data-theme-val="dark">Dark</button>
-                            <button class="theme-opt" data-theme-val="system">System</button>
+                            <button class="theme-opt" data-theme-val="light"><i data-lucide="sun" size="14"></i> Light</button>
+                            <button class="theme-opt active" data-theme-val="dark"><i data-lucide="moon" size="14"></i> Dark</button>
+                            <button class="theme-opt" data-theme-val="system"><i data-lucide="monitor" size="14"></i> System</button>
                         </div>
                     </div>
                     <div class="settings-divider"></div>
                     <div class="settings-option" onclick="window.open('staff.html', '_blank')">
-                        <i data-lucide="shield-check" size="14"></i>
+                        <i data-lucide="shield-check" size="14" class="accent-icon"></i>
                         <span>Staff Center Dashboard</span>
                     </div>
-                    <div class="settings-option" id="clear-history-btn">
+                    <div class="settings-option danger-hover" id="clear-history-btn">
                         <i data-lucide="trash-2" size="14"></i>
                         <span>Clear chat history</span>
                     </div>
                 </div>
 
-                <div class="location-info nav-text">
-                    <div class="location-dot"></div>
+                <div class="location-info nav-text glass-capsule">
+                    <div class="location-dot pulse-anim"></div>
                     <span>Mumbai, MH, India</span>
                 </div>
             </div>
@@ -68,31 +76,40 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="main-header">
+            <header class="main-header glass-header">
                 <div class="header-left">
-                    <button class="icon-btn" id="header-menu-toggle"><i data-lucide="menu" size="20"></i></button>
+                    <button class="icon-btn glow-hover" id="header-menu-toggle"><i data-lucide="menu" size="20"></i></button>
                     <div class="model-selector-container">
-                        <div class="model-selector" id="model-selector">
-                            <span>TejGPT Fast</span>
+                        <div class="model-selector glass-pill" id="model-selector">
+                            <span class="gradient-text">TejGPT Fast</span>
                             <i data-lucide="chevron-down" size="16"></i>
                         </div>
-                        <div class="model-menu" id="model-dropdown">
+                        <div class="model-menu glass-menu" id="model-dropdown">
                             <div class="model-menu-item active" data-model="fast">
-                                <strong>Fast</strong>
-                                <span>Great for everyday tasks</span>
+                                <i data-lucide="zap" class="accent-icon"></i>
+                                <div>
+                                    <strong>Fast</strong>
+                                    <span>Great for everyday tasks</span>
+                                </div>
                             </div>
                             <div class="model-menu-item" data-model="advanced">
-                                <strong>Advanced</strong>
-                                <span>Our most capable model</span>
+                                <i data-lucide="sparkles" class="accent-secondary-icon"></i>
+                                <div>
+                                    <strong>Advanced</strong>
+                                    <span>Our most capable model</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="header-right">
                     <div id="auth-header-container">
-                        <button class="login-btn-pro" id="login-btn-header">Log In</button>
+                        <button class="login-btn-pro premium-gradient-btn" id="login-btn-header">
+                            <span>Log In</span>
+                            <div class="btn-highlight"></div>
+                        </button>
                     </div>
-                    <button class="icon-btn" id="profile-btn" style="display: none;"><i data-lucide="user-circle" size="22"></i></button>
+                    <button class="icon-btn avatar-btn" id="profile-btn" style="display: none;"><i data-lucide="user-circle" size="22"></i></button>
                 </div>
             </header>
 
@@ -100,26 +117,37 @@
                 <div class="messages-list" id="messages-container">
                     <!-- Welcome Screen -->
                     <div class="welcome-view" id="welcome-screen">
+                        <div class="welcome-badge pulse-border">
+                            <i data-lucide="cpu" size="14"></i> Intelligence OS v2.0
+                        </div>
                         <div class="welcome-content">
-                            <h1>Hello, I am TejGPT</h1>
-                            <p class="subtitle">How can I help you today?</p>
+                            <h1 class="hero-title">Hello, I am <span class="gradient-text-animated">TejGPT</span></h1>
+                            <p class="subtitle">How can I assist you in shaping the future today?</p>
                             
                             <div class="suggestion-grid">
-                                <div class="suggestion-card" onclick="setInput('Create an image of an astronaut riding a horse in space')">
-                                    <i data-lucide="image"></i>
-                                    <p>Create Image</p>
+                                <div class="suggestion-card glass-card hover-lift" onclick="setInput('Create an image of an astronaut riding a horse in space')">
+                                    <div class="card-icon-wrapper bg-gradient-1">
+                                        <i data-lucide="image"></i>
+                                    </div>
+                                    <p>Create spectacular visuals</p>
                                 </div>
-                                <div class="suggestion-card" onclick="setInput('Help me write a Python script to scrape a website')">
-                                    <i data-lucide="code"></i>
-                                    <p>Write code</p>
+                                <div class="suggestion-card glass-card hover-lift" onclick="setInput('Help me write a Python script to scrape a website')">
+                                    <div class="card-icon-wrapper bg-gradient-2">
+                                        <i data-lucide="code"></i>
+                                    </div>
+                                    <p>Write complex algorithms</p>
                                 </div>
-                                <div class="suggestion-card" onclick="setInput('Plan a 3-day trip to Tokyo on a budget')">
-                                    <i data-lucide="map"></i>
-                                    <p>Plan a trip</p>
+                                <div class="suggestion-card glass-card hover-lift" onclick="setInput('Plan a 3-day trip to Tokyo on a budget')">
+                                    <div class="card-icon-wrapper bg-gradient-3">
+                                        <i data-lucide="map"></i>
+                                    </div>
+                                    <p>Plan seamless adventures</p>
                                 </div>
-                                <div class="suggestion-card" onclick="setInput('Draft a professional email to my boss about a promotion')">
-                                    <i data-lucide="mail"></i>
-                                    <p>Draft email</p>
+                                <div class="suggestion-card glass-card hover-lift" onclick="setInput('Draft a professional email to my boss about a promotion')">
+                                    <div class="card-icon-wrapper bg-gradient-4">
+                                        <i data-lucide="mail"></i>
+                                    </div>
+                                    <p>Draft professional copy</p>
                                 </div>
                             </div>
                         </div>
@@ -128,32 +156,31 @@
 
                 <!-- Input Area -->
                 <div class="input-area-container">
-                    <div class="input-bar-wrapper">
+                    <div class="input-bar-wrapper glass-input-panel">
+                        <div class="preview-panel" id="preview-area" style="display: none;">
+                            <div class="preview-item">
+                                <img id="image-preview" src="" alt="">
+                                <button class="close-preview" id="remove-preview"><i data-lucide="x"></i></button>
+                            </div>
+                        </div>
                         <div class="input-bar">
-                            <button class="input-icon-btn" id="upload-btn">
-                                <i data-lucide="plus"></i>
+                            <button class="input-icon-btn hover-bg" id="upload-btn">
+                                <i data-lucide="paperclip"></i>
                             </button>
                             <input type="file" id="file-input" style="display: none;">
                             
                             <textarea 
                                 id="chat-input" 
-                                placeholder="Enter a prompt here" 
+                                placeholder="Message TejGPT..." 
                                 rows="1"
                                 autocomplete="off"
                             ></textarea>
                             
                             <div class="input-right-actions">
-                                <button class="input-icon-btn" id="mic-btn"><i data-lucide="mic"></i></button>
-                                <button class="send-button" id="send-btn" disabled>
-                                    <i data-lucide="send"></i>
+                                <button class="input-icon-btn hover-bg" id="mic-btn"><i data-lucide="mic"></i></button>
+                                <button class="send-button premium-send" id="send-btn" disabled>
+                                    <i data-lucide="arrow-up"></i>
                                 </button>
-                            </div>
-                        </div>
-                        
-                        <div class="preview-panel" id="preview-area" style="display: none;">
-                            <div class="preview-item">
-                                <img id="image-preview" src="" alt="">
-                                <button class="close-preview" id="remove-preview"><i data-lucide="x"></i></button>
                             </div>
                         </div>
                     </div>
@@ -164,56 +191,76 @@
     </div>
 
     <!-- Auth Modal Overlay -->
-    <div class="auth-modal-overlay" id="auth-modal">
-        <div class="auth-card">
+    <div class="auth-modal-overlay glass-overlay" id="auth-modal">
+        <div class="auth-card premium-glass-card">
             <button class="auth-close" id="auth-close"><i data-lucide="x" size="20"></i></button>
             <div class="auth-header">
+                <div class="auth-icon-badge">
+                    <i data-lucide="cloud"></i>
+                </div>
                 <h2>Access the Cloud</h2>
-                <p>Sign in to sync your chats across all devices.</p>
+                <p>Sign in to sync your intelligence across all devices.</p>
             </div>
             <div class="auth-form" id="auth-form">
-                <input type="text" id="auth-username" placeholder="Username" autocomplete="off">
-                <input type="password" id="auth-password" placeholder="Password">
-                <button class="auth-action-btn" id="auth-submit">Sign In</button>
+                <div class="input-group">
+                    <i data-lucide="user" class="input-icon"></i>
+                    <input type="text" id="auth-username" placeholder="Username" autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <i data-lucide="lock" class="input-icon"></i>
+                    <input type="password" id="auth-password" placeholder="Password">
+                </div>
+                <button class="auth-action-btn premium-gradient-btn" id="auth-submit">
+                    <span>Sign In</span>
+                </button>
                 
-                <button class="google-auth-btn-prime" id="google-login" style="margin-top: 0.5rem;">
+                <div class="auth-divider"><span>OR</span></div>
+                
+                <button class="google-auth-btn-prime" id="google-login">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
                     Continue with Google
                 </button>
             </div>
             <div class="auth-footer" id="auth-footer">
-                Don't have an account? <span id="auth-toggle">Sign up</span>
+                Don't have an account? <span class="auth-switch-link" id="auth-toggle">Sign up</span>
             </div>
        </div>
     </div>
 
     <!-- Voice Overlay -->
-    <div class="voice-screen" id="voice-overlay">
-        <div class="voice-anim">
-            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="voice-screen glass-overlay" id="voice-overlay">
+        <div class="voice-anim-container">
+            <div class="voice-glow"></div>
+            <div class="voice-anim">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
         </div>
-        <h3>Listening...</h3>
-        <button class="voice-close" id="cancel-voice">Cancel</button>
+        <h3 class="voice-status">Listening intently...</h3>
+        <button class="voice-close premium-btn outlined" id="cancel-voice">Cancel</button>
     </div>
 
     <!-- Live Support Chat Widget -->
-    <div class="support-widget" id="support-widget">
-        <div class="support-header">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div class="support-avatar">HB</div>
+    <div class="support-widget premium-glass-widget" id="support-widget">
+        <div class="support-header premium-gradient-bg">
+            <div class="support-agent-info">
+                <div class="support-avatar online-badge">
+                    <i data-lucide="bot" size="20"></i>
+                </div>
                 <div>
-                    <div style="font-weight: 600; font-size: 0.85rem;">TejGPT Help Bot</div>
-                    <div style="font-size: 0.7rem; opacity: 0.8;">Active Now</div>
+                    <div class="support-name">TejGPT Help Bot</div>
+                    <div class="support-status">Active Now</div>
                 </div>
             </div>
-            <button class="support-close" id="support-close"><i data-lucide="x" size="16"></i></button>
+            <button class="support-close" id="support-close"><i data-lucide="x" size="18"></i></button>
         </div>
-        <div class="support-messages" id="support-messages">
-            <div class="support-msg bot bot-welcome">Hi Tejas! How can I help you today? I'm the official TejGPT Support Bot.</div>
+        <div class="support-messages scroll-pretty" id="support-messages">
+            <div class="support-msg bot bot-welcome">
+                <div class="msg-content">Hi Tejas! How can I help you today? I'm the official TejGPT Support Bot.</div>
+            </div>
         </div>
         <div class="support-input-area">
             <input type="text" id="support-input" placeholder="Type a message...">
-            <button id="support-send"><i data-lucide="send" size="16"></i></button>
+            <button id="support-send" class="premium-icon-btn"><i data-lucide="send" size="16"></i></button>
         </div>
     </div>
 
