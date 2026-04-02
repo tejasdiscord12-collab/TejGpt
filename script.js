@@ -188,14 +188,10 @@ function init() {
     let isSignupMode = false;
 
     async function loadUserHistory(user) {
-        if (!supabaseClient) return;
         try {
-            const { data, error } = await supabaseClient
-                .from('chats_history')
-                .select('*')
-                .eq('username', user);
-                
-            if (error) throw error;
+            const res = await fetch(`/api/history?user=${encodeURIComponent(user)}`);
+            if (!res.ok) throw new Error("Could not fetch history");
+            const data = await res.json();
             
             // Clear current screen
             if (messagesContainer) messagesContainer.innerHTML = '';
@@ -544,8 +540,8 @@ function startNewChat() {
 function addHistoryTab(text) {
     if (!text) return;
     const tab = document.createElement('div');
-    tab.className = 'history-item';
-    tab.innerHTML = `<i data-lucide="message-square" size="14"></i> <span class="nav-text">${text}</span>`;
+    tab.className = 'history-item nav-item glass-hover';
+    tab.innerHTML = `<i data-lucide="message-square" size="16"></i> <span class="nav-text" style="font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; display: inline-block; vertical-align: middle;">${text}</span>`;
     tab.onclick = () => setInput(text);
     if (historyList) {
         const label = historyList.querySelector('.history-section-label');
