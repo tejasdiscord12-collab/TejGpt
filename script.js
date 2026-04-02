@@ -189,9 +189,26 @@ function init() {
 
     async function loadUserHistory(user) {
         try {
-            const res = await fetch(`/api/history?user=${encodeURIComponent(user)}`);
-            if (!res.ok) throw new Error("Could not fetch history");
-            const data = await res.json();
+            // Prevent ALL caching mechanisms (Vercel Cache + Browser Cache)
+            const res = await fetch(`/api/history?user=${encodeURIComponent(user)}&t=${Date.now()}`, {
+                cache: 'no-store',
+                headers: { 'Cache-Control': 'no-cache' }
+            });
+            
+            let data = [];
+            if (res.ok) {
+                data = await res.json();
+            }
+
+            // HYBRID FALLBACK: If Supabase fails or is empty, check Local Storage!
+            if ((!data || data.length === 0) && localStorage.getItem(`tejgpt_local_${user}`)) {
+                try {
+                    const localFallback = JSON.parse(localStorage.getItem(`tejgpt_local_${user}`));
+                    if (localFallback && localFallback.length > 0) {
+                        data = localFallback; // Local cache rescues the data
+                    }
+                } catch(err) { /* silent fail */ }
+            }
             
             // Clear current screen
             if (messagesContainer) messagesContainer.innerHTML = '';
@@ -202,18 +219,27 @@ function init() {
             if (data && data.length > 0) {
                 if (welcomeScreen) welcomeScreen.style.display = 'none';
                 
-                // Add the welcome screen back at the top implicitly or just hide it
-                // We recreate the chat thread below
+                // Track already added prompt tabs to avoid duplicates in sidebar
+                const seenTabs = new Set();
+
                 data.forEach(chat => {
                     if (chat.prompt && chat.response) {
                         renderMessage(chat.prompt, 'user');
                         chatHistory.push({ role: 'user', content: chat.prompt });
-                        addHistoryTab(chat.prompt);
+                        
+                        if (!seenTabs.has(chat.prompt)) {
+                             addHistoryTab(chat.prompt);
+                             seenTabs.add(chat.prompt);
+                        }
                         
                         renderMessage(chat.response, 'ai');
                         chatHistory.push({ role: 'assistant', content: chat.response });
                     }
                 });
+                
+                // Immediately backup the loaded data locally just in case
+                localStorage.setItem(`tejgpt_local_${user}`, JSON.stringify(data));
+                
             } else {
                 if (welcomeScreen) welcomeScreen.style.display = 'block';
             }
@@ -419,6 +445,15 @@ async function submitMessage() {
         const response = await callGroqAPI(text);
         streamResponse(aiBox, response);
         addHistoryTab(text);
+        
+        // HYBRID BACKUP: Every time an exchange succeeds, backup to local storage silently!
+        const currentUser = localStorage.getItem('tejgpt_user') || "guest";
+        try {
+            const currentSave = JSON.parse(localStorage.getItem(`tejgpt_local_${currentUser}`) || '[]');
+            currentSave.push({ prompt: text, response: response });
+            localStorage.setItem(`tejgpt_local_${currentUser}`, JSON.stringify(currentSave));
+        } catch (e) {}
+        
     } catch (err) {
         aiBox.innerHTML = `<span>Error: ${err.message}</span>`;
     }
