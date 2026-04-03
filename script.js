@@ -435,22 +435,24 @@ async function submitMessage() {
     chatInput.style.height = 'auto';
     sendBtn.disabled = true;
     if (previewArea) previewArea.style.display = 'none';
+    
+    const imgData = attachedImage;
     attachedImage = null;
 
     if (welcomeScreen) welcomeScreen.style.display = 'none';
-    renderMessage(text, 'user');
+    renderMessage(text || "Uploaded an image", 'user');
     const aiBox = renderMessage('', 'ai', true);
     
     try {
-        const response = await callGroqAPI(text);
+        const response = await callGroqAPI(text, imgData);
         streamResponse(aiBox, response);
-        addHistoryTab(text);
+        addHistoryTab(text || "Image uploaded");
         
         // HYBRID BACKUP: Every time an exchange succeeds, backup to local storage silently!
         const currentUser = localStorage.getItem('tejgpt_user') || "guest";
         try {
             const currentSave = JSON.parse(localStorage.getItem(`tejgpt_local_${currentUser}`) || '[]');
-            currentSave.push({ prompt: text, response: response });
+            currentSave.push({ prompt: text || "Image uploaded", response: response });
             localStorage.setItem(`tejgpt_local_${currentUser}`, JSON.stringify(currentSave));
         } catch (e) {}
         
@@ -459,11 +461,20 @@ async function submitMessage() {
     }
 }
 
-async function callGroqAPI(prompt) {
+async function callGroqAPI(prompt, imgData) {
     const currentUser = localStorage.getItem('tejgpt_user') || "guest";
+    
+    let userContent = prompt || "Analyze this image.";
+    if (imgData) {
+        userContent = [
+            { type: "text", text: userContent },
+            { type: "image_url", image_url: { url: imgData } }
+        ];
+    }
+    
     const messages = [
         ...chatHistory.slice(-10),
-        { role: "user", content: prompt }
+        { role: "user", content: userContent }
     ];
 
     let res;
@@ -499,7 +510,15 @@ async function callGroqAPI(prompt) {
 
     const content = data.choices && data.choices[0] ? data.choices[0].message.content : "";
     
-    chatHistory.push({ role: "user", content: prompt }, { role: "assistant", content: content });
+    let histPrompt = prompt || "Image";
+    if (imgData) {
+        histPrompt = [
+            { type: "text", text: prompt || "Analyze this image." },
+            { type: "image_url", image_url: { url: imgData } }
+        ];
+    }
+    
+    chatHistory.push({ role: "user", content: histPrompt }, { role: "assistant", content: content });
     return content;
 }
 

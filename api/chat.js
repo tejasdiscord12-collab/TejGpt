@@ -32,9 +32,16 @@ export default async function handler(req, res) {
         // 2. Call the AI WITH Quota Knowledge
         if (!GROQ_API_KEY) return res.status(500).json({ error: 'Groq API Key missing.' });
 
+        let hasImage = false;
+        messages.forEach(m => {
+            if (Array.isArray(m.content)) hasImage = true;
+        });
+
+        const selectedModel = hasImage ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile";
+
         const systemMsg = { 
             role: "system", 
-            content: `You are TejGPT, a professional AI created by Tejas. STRICT RULE: NEVER mention message counts, quotas, or limits in your responses UNLESS the user explicitly asks "What is my quota" or "How many messages left". If they do ask, tell them they have used ${count} out of ${QUOTA_LIMIT} messages. Otherwise, focus entirely on answering their prompt naturally and professionally.` 
+            content: `You are TejGPT, a professional AI created by Tejas. STRICT RULE: NEVER mention message counts, quotas, or limits in your responses UNLESS the user explicitly asks "What is my quota" or "How many messages left". If they do ask, tell them they have used ${count} out of ${QUOTA_LIMIT} messages. Otherwise, focus entirely on answering their prompt naturally and professionally. If given an image, please analyze it in detail.` 
         };
 
         let groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -42,7 +49,7 @@ export default async function handler(req, res) {
             headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 messages: [systemMsg, ...messages], 
-                model: "llama-3.3-70b-versatile", 
+                model: selectedModel, 
                 temperature: 0.7 
             })
         });
@@ -58,7 +65,7 @@ export default async function handler(req, res) {
                     headers: { 'Authorization': `Bearer ${FALLBACK_KEY}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         messages: [systemMsg, ...messages], 
-                        model: "llama-3.3-70b-versatile", 
+                        model: selectedModel, 
                         temperature: 0.7 
                     })
                 });
@@ -70,8 +77,12 @@ export default async function handler(req, res) {
 
         // 3. Save to Supabase History
         if (aiMessage) {
+            let savedPrompt = messages[messages.length - 1].content;
+            if (Array.isArray(savedPrompt)) {
+                savedPrompt = savedPrompt.find(c => c.type === "text")?.text || "Image content";
+            }
             await supabase.from('chats_history').insert([
-                { username: user, prompt: messages[messages.length - 1].content, response: aiMessage }
+                { username: user, prompt: savedPrompt, response: aiMessage }
             ]);
         }
 
